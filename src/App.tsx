@@ -5,6 +5,7 @@ import { BottomNavBar, type NavItem } from "@/components/ui/bottom-nav-bar";
 import { ConfettiProvider } from "@/components/ui/confetti";
 import { CelebrationToast } from "@/components/ui/celebration-toast";
 import { useStore } from "@/store/useStore";
+import { cn } from "@/lib/utils";
 import { useGoalEngine } from "@/hooks/useGoalEngine";
 import { TodayScreen } from "@/screens/TodayScreen";
 import { NutritionScreen } from "@/screens/NutritionScreen";
@@ -32,11 +33,25 @@ const NAV: NavItem<Tab>[] = [
 export const NavContext = React.createContext<{ go: (t: Tab) => void; openProfile: () => void }>({ go: () => {}, openProfile: () => {} });
 export const useNav = () => React.useContext(NavContext);
 
+/** Liggende gsm (breed en laag): dan zijbalk-navigatie en twee kolommen. */
+function useShort() {
+  const q = "(orientation: landscape) and (max-height: 520px)";
+  const [short, setShort] = React.useState(() => (typeof window !== "undefined" ? window.matchMedia(q).matches : false));
+  React.useEffect(() => {
+    const m = window.matchMedia(q);
+    const on = () => setShort(m.matches);
+    m.addEventListener("change", on);
+    return () => m.removeEventListener("change", on);
+  }, []);
+  return short;
+}
+
 function Shell() {
   const onboarded = useStore((s) => s.onboarded);
   const activeWorkout = useStore((s) => s.activeWorkout);
   const [tab, setTab] = React.useState<Tab>("vandaag");
   const [profileOpen, setProfileOpen] = React.useState(false);
+  const short = useShort();
   useGoalEngine();
   useScoreSync();
   // Ontgrendelde accentkleur toepassen op de hele app.
@@ -63,10 +78,15 @@ function Shell() {
 
   return (
     <NavContext.Provider value={nav}>
-      <div className="relative mx-auto flex h-full w-full max-w-md flex-col bg-background">
+      <div className="relative mx-auto flex h-full w-full max-w-md flex-col bg-background safe-x short:max-w-none short:flex-row">
+        {short && !hideNav && (
+          <aside className="flex w-[84px] shrink-0 flex-col items-center justify-center border-r border-border bg-background">
+            <BottomNavBar items={NAV} active={tab} onChange={setTab} vertical />
+          </aside>
+        )}
         <main className="flex-1 overflow-y-auto overscroll-contain safe-top">
           <AnimatePresence mode="wait" initial={false}>
-            <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }} className={hideNav ? "min-h-full pb-6" : "min-h-full safe-bottom"}>
+            <motion.div key={tab} initial={{ opacity: 0, y: 8 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -8 }} transition={{ duration: 0.18 }} className={cn(hideNav ? "min-h-full pb-6" : "min-h-full safe-bottom", "short:mx-auto short:max-w-3xl")}>
               {tab === "vandaag" && <TodayScreen />}
               {tab === "voeding" && <NutritionScreen />}
               {tab === "training" && <TrainingScreen />}
@@ -75,7 +95,7 @@ function Shell() {
             </motion.div>
           </AnimatePresence>
         </main>
-        {!hideNav && (
+        {!hideNav && !short && (
           <div className="pointer-events-none fixed inset-x-0 bottom-0 z-40 flex justify-center pb-[calc(env(safe-area-inset-bottom)+12px)]">
             <div className="pointer-events-auto">
               <BottomNavBar items={NAV} active={tab} onChange={setTab} />

@@ -49,8 +49,8 @@ export function TodayScreen() {
   });
 
   return (
-    <div>
-      <PageHeader title={`${greeting}, ${firstName}`} subtitle={fmtDay(today)} />
+    <div className="short:grid short:grid-cols-2 short:items-start short:gap-x-2">
+      <PageHeader title={`${greeting}, ${firstName}`} subtitle={fmtDay(today)} className="short:col-span-2" />
 
       {/* Level + XP */}
       <Section>
@@ -74,7 +74,7 @@ export function TodayScreen() {
                   Volgende beloning: <span className="font-semibold text-foreground">{nextReward.icon} {nextReward.name}</span> op level {nextReward.level}
                 </p>
               )}
-              <div className="mt-2 flex items-center gap-2">
+              <div className="mt-2 flex flex-wrap items-center gap-2">
                 <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">
                   <Zap className="size-3" /> +{todayXp} vandaag
                 </span>
@@ -85,8 +85,8 @@ export function TodayScreen() {
             </div>
           </div>
           <button type="button" onClick={() => setRewards(true)} className="mt-3 flex w-full items-center justify-between rounded-xl bg-primary/10 px-3 py-2 text-left text-sm">
-            <span className="flex items-center gap-2 font-semibold"><Gift className="size-4 text-primary" /> Beloningen</span>
-            <span className="text-xs text-muted-foreground">{nextReward ? `nog ${Math.max(0, xpForLevel(nextReward.level) - xp).toLocaleString("nl-BE")} XP tot de volgende` : "alles ontgrendeld"}</span>
+            <span className="flex shrink-0 items-center gap-2 font-semibold"><Gift className="size-4 text-primary" /> Beloningen</span>
+            <span className="ml-2 truncate text-right text-xs text-muted-foreground">{nextReward ? `nog ${Math.max(0, xpForLevel(nextReward.level) - xp).toLocaleString("nl-BE")} XP` : "alles ontgrendeld"}</span>
           </button>
         </Card>
       </Section>

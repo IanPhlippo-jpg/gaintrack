@@ -64,8 +64,8 @@ export function WeightScreen() {
   }, [data, goals.targetWeight]);
 
   return (
-    <div>
-      <PageHeader title="Gewicht" subtitle={latest ? `Laatste meting: ${fmtKg(latest.kg)} op ${fmtShort(latest.day)}` : `Startgewicht ${fmtKg(profile.startWeight)} · nog geen meting bevestigd`} />
+    <div className="short:grid short:grid-cols-2 short:items-start short:gap-x-2">
+      <PageHeader className="short:col-span-2" title="Gewicht" subtitle={latest ? `Laatste meting: ${fmtKg(latest.kg)} op ${fmtShort(latest.day)}` : `Startgewicht ${fmtKg(profile.startWeight)} · nog geen meting bevestigd`} />
 
       <Section>
         <WeeklyDatePicker date={fromKey(day)} setDate={(d) => setDay(dayKey(d))} markers={markers} maxDate={new Date()} />

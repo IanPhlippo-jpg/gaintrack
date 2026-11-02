@@ -92,3 +92,8 @@
 - [x] Ring en titel zichtbaar in kop, vergrendelscherm en klassement; meegestuurd naar Supabase (kolommen frame, title)
 - [x] Viering (confetti + toast) bij nieuw level met de ontgrendelde beloning
 - [x] Getest in browser (level-up-viering, ring actief, gouden accent, dubbele weekend-XP), gepusht en live
+
+## Landschapsmodus nakijken (2026-11-02)
+- [x] Alle schermen bekeken op 812×375: smalle kolom met lege zijkanten, nav-balk nam hoogte in, pincodescherm paste niet, panelen te breed
+- [x] Liggend (short-variant): zijbalk-navigatie links, twee kolommen op Vandaag/Voeding/Gewicht/Stats, panelen gecentreerd (max 760 px), pincode naast het toetsenbord, safe-areas links/rechts
+- [x] Gecontroleerd liggend en staand; levels trager (800×(L−1)^2,1), water-XP enkel tot dagdoel, max 6 maaltijd-XP per dag, kcal binnen 7 %; live gezet

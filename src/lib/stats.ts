@@ -38,12 +38,12 @@ export function dailyGoals(s: AppState, day: string): DailyGoal[] {
   const planned = routinesForDay(s, day);
   const restDay = planned.length === 0;
 
-  const kcalOk = n.kcal > 0 && Math.abs(n.kcal - g.kcal) <= g.kcal * 0.1;
+  const kcalOk = n.kcal > 0 && Math.abs(n.kcal - g.kcal) <= g.kcal * 0.07;
   const goals: DailyGoal[] = [
     {
       id: "kcal", label: "Calorieën", value: n.kcal, target: g.kcal, unit: "kcal", icon: "🔥",
       done: kcalOk, pct: Math.min(100, (n.kcal / g.kcal) * 100),
-      hint: n.kcal === 0 ? "Nog niets gelogd" : kcalOk ? "Binnen 10% van je doel" : n.kcal < g.kcal ? `Nog ${Math.round(g.kcal - n.kcal)} kcal te gaan` : `${Math.round(n.kcal - g.kcal)} kcal boven doel`,
+      hint: n.kcal === 0 ? "Nog niets gelogd" : kcalOk ? "Binnen 7% van je doel" : n.kcal < g.kcal ? `Nog ${Math.round(g.kcal - n.kcal)} kcal te gaan` : `${Math.round(n.kcal - g.kcal)} kcal boven doel`,
     },
     {
       id: "protein", label: "Eiwit", value: n.protein, target: g.protein, unit: "g", icon: "🥩",

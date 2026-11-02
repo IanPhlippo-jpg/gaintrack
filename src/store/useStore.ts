@@ -155,7 +155,8 @@ export const useStore = create<AppState>()(
           kcal: round(food.kcal * k), protein: round(food.protein * k, 1), carbs: round(food.carbs * k, 1), fat: round(food.fat * k, 1), at: Date.now(),
         };
         set((s) => ({ foodLog: [...s.foodLog, entry] }));
-        get().awardXp(XP.meal, `Maaltijd gelogd: ${food.name}`, day);
+        // Hooguit 6 maaltijd-registraties per dag leveren XP op.
+        if (get().foodLog.filter((e) => e.day === day).length <= 6) get().awardXp(XP.meal, `Maaltijd gelogd: ${food.name}`, day);
       },
       updateFoodEntry: (id, grams) =>
         set((s) => ({
@@ -167,8 +168,12 @@ export const useStore = create<AppState>()(
         })),
       removeFoodEntry: (id) => set((s) => ({ foodLog: s.foodLog.filter((e) => e.id !== id) })),
       addWater: (day, ml) => {
+        const before = get().water[day] ?? 0;
         set((s) => ({ water: { ...s.water, [day]: Math.max(0, (s.water[day] ?? 0) + ml) } }));
-        if (ml > 0) get().awardXp(XP.water, "Water gedronken", day);
+        // XP enkel zolang je onder je dagdoel zit: eindeloos water tikken levert niets op.
+        if (ml > 0 && before < get().goals.waterMl) get().awardXp(XP.water, "Water gedronken", day);
+        return;
+
       },
 
       addCustomExercise: (ex) => {

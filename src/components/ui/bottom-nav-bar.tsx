@@ -20,9 +20,11 @@ type BottomNavBarProps<T extends string> = {
   active: T;
   onChange: (id: T) => void;
   className?: string;
+  /** Verticale zijbalk (liggende gsm): alleen iconen, onder elkaar. */
+  vertical?: boolean;
 };
 
-export function BottomNavBar<T extends string>({ items, active, onChange, className }: BottomNavBarProps<T>) {
+export function BottomNavBar<T extends string>({ items, active, onChange, className, vertical = false }: BottomNavBarProps<T>) {
   return (
     <LayoutGroup id="bottom-nav">
       <motion.nav
@@ -32,7 +34,8 @@ export function BottomNavBar<T extends string>({ items, active, onChange, classN
         role="navigation"
         aria-label="Hoofdnavigatie"
         className={cn(
-          "flex h-[60px] items-center gap-1 rounded-full border border-border bg-card/90 p-2 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl",
+          "flex items-center gap-1 border border-border bg-card/90 p-2 shadow-[0_12px_40px_-12px_rgba(0,0,0,0.6)] backdrop-blur-xl",
+          vertical ? "h-auto flex-col rounded-[28px]" : "h-[60px] rounded-full",
           className,
         )}
       >
@@ -57,7 +60,7 @@ export function BottomNavBar<T extends string>({ items, active, onChange, classN
               </motion.span>
               <motion.div
                 initial={false}
-                animate={{ width: isActive ? `${MOBILE_LABEL_WIDTH}px` : "0px", opacity: isActive ? 1 : 0, marginLeft: isActive ? "8px" : "0px" }}
+                animate={{ width: isActive && !vertical ? `${MOBILE_LABEL_WIDTH}px` : "0px", opacity: isActive && !vertical ? 1 : 0, marginLeft: isActive && !vertical ? "8px" : "0px" }}
                 transition={{ width: SPRING, opacity: { duration: 0.18 }, marginLeft: SPRING }}
                 className="relative z-10 flex max-w-[64px] items-center overflow-hidden"
               >

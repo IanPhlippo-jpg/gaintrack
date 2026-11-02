@@ -55,7 +55,7 @@ export function PinPad({ onDigit, onBackspace, disabled }: { onDigit: (d: string
             disabled={disabled}
             onClick={() => (k === "back" ? onBackspace() : onDigit(k))}
             aria-label={k === "back" ? "Wis cijfer" : k}
-            className="grid h-16 place-items-center rounded-2xl border bg-card text-2xl font-semibold text-foreground transition-transform active:scale-95 disabled:opacity-40"
+            className="grid h-16 place-items-center rounded-2xl border bg-card text-2xl font-semibold text-foreground transition-transform active:scale-95 disabled:opacity-40 short:h-11 short:rounded-xl short:text-xl"
           >
             {k === "back" ? <Delete className="size-6" /> : k}
           </button>
@@ -98,7 +98,7 @@ export function Avatar({ account, size = "md", className }: { account: Pick<Acco
 function Header({ title, help }: { title: string; help?: string }) {
   return (
     <div className="text-center">
-      <img src={logoSrc} alt="" className="mx-auto mb-4 size-16 rounded-2xl shadow-[0_12px_30px_-10px_rgba(139,124,199,0.8)]" />
+      <img src={logoSrc} alt="" className="mx-auto mb-4 size-16 rounded-2xl shadow-[0_12px_30px_-10px_rgba(139,124,199,0.8)] short:hidden" />
       <h1 className="text-2xl font-extrabold tracking-tight">{title}</h1>
       {help && <p className="mt-1 text-sm text-muted-foreground">{help}</p>}
     </div>
@@ -113,7 +113,7 @@ function LockScreen({ registry, onUpdate, onReady }: { registry: Registry; onUpd
   const slide = { initial: { opacity: 0, x: 24 }, animate: { opacity: 1, x: 0 }, exit: { opacity: 0, x: -24 }, transition: { duration: 0.18 } };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-y-auto bg-background px-5 pb-8 pt-[calc(env(safe-area-inset-top)+40px)]">
+    <div className="mx-auto flex h-full w-full max-w-md flex-col overflow-y-auto bg-background px-5 pb-8 pt-[calc(env(safe-area-inset-top)+40px)] safe-x short:max-w-2xl short:pb-4 short:pt-3">
       <AnimatePresence mode="wait" initial={false}>
         {view.kind === "pick" && (
           <motion.div key="pick" {...slide} className="flex flex-1 flex-col">
@@ -197,15 +197,21 @@ function PinLogin({ registry, account, onUpdate, onBack, onReady }: { registry: 
       <button type="button" onClick={onBack} className="mb-4 flex items-center gap-1 self-start text-sm text-muted-foreground">
         <ArrowLeft className="size-4" /> Ander account
       </button>
+      <div className="short:flex short:items-center short:gap-8">
+      <div className="short:flex-1">
       <div className="flex flex-col items-center text-center">
         <Avatar account={account} size="lg" />
         <h1 className="mt-4 text-2xl font-extrabold tracking-tight">Hallo {account.name}</h1>
         <p className="mt-1 text-sm text-muted-foreground">{locked ? `Te veel foute pogingen. Probeer opnieuw over ${waitSec} s.` : "Geef je pincode in."}</p>
       </div>
-      <div className="my-8">
+      <div className="my-8 short:my-4">
         <PinDots length={4} filled={pin.length} shake={shake} />
       </div>
-      <PinPad onDigit={digit} onBackspace={() => setPin((p) => p.slice(0, -1))} disabled={busy || locked} />
+      </div>
+      <div className="short:flex-1">
+        <PinPad onDigit={digit} onBackspace={() => setPin((p) => p.slice(0, -1))} disabled={busy || locked} />
+      </div>
+      </div>
     </>
   );
 }
@@ -329,18 +335,22 @@ function CreateAccount({ registry, canBack, onBack, onReady }: { registry: Regis
       )}
 
       {(step === "pin" || step === "confirm") && (
-        <>
+        <div className="short:flex short:items-center short:gap-8">
+          <div className="short:flex-1">
           <Header title={step === "pin" ? "Kies een pincode" : "Herhaal je pincode"} help={step === "pin" ? "4 cijfers. Je geeft hem één keer in per toestel." : "Nog eens dezelfde 4 cijfers."} />
-          <div className="my-8">
+          <div className="my-8 short:my-4">
             <PinDots length={4} filled={step === "pin" ? pin.length : confirm.length} shake={shake} />
           </div>
+          </div>
+          <div className="short:flex-1">
           <PinPad onDigit={onDigit} onBackspace={onBackspace} disabled={busy} />
           {check?.admin && (
             <p className="mt-6 flex items-center justify-center gap-1 text-xs text-primary">
               <Check className="size-3.5" /> Beheersleutel herkend: dit wordt het beheerdersaccount.
             </p>
           )}
-        </>
+          </div>
+        </div>
       )}
     </>
   );

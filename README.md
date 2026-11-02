@@ -87,14 +87,17 @@ In de voedingskiezer: tik op het barcode-icoon en dan op **Camera openen** (iOS 
 ## Instellingen (profiel-icoon)
 Profiel en doelen, herberekenen van macro's, rusttimer (aan/uit, standaardrust, overal dezelfde rust), trillen, alles wissen.
 
+## Liggende stand
+Op een liggende gsm (`short`-variant in `src/index.css`: landscape en hoogte ≤ 520 px) staat de navigatie als zijbalk links, krijgen Vandaag, Voeding, Gewicht en Statistieken twee kolommen, blijven panelen gecentreerd op maximaal 760 px en staat het pincodetoetsenbord naast de tekst.
+
 ## Beloningen per level
 Onder de levelkaart op Vandaag staat **Beloningen**: elk level ontgrendelt iets (`src/lib/unlocks.ts`). Cosmetisch en zichtbaar voor anderen in het klassement: avatar-ringen (brons 2, zilver 6, goud 10, diamant 15, legende 20), accentkleuren (goud 3, roze 7, groen 11, vuur 17), titels (4, 9, 14, 20, 30) en confetti (13, 25). Voordelen: streak-schild op level 5 (een gemiste dag per week breekt de streak niet), dubbele XP in het weekend op level 8, weekbonus van 250 XP bij 5 perfecte dagen op level 12. Bij een nieuw level verschijnt een viering met wat je ontgrendeld hebt; op de levelkaart staat altijd de volgende beloning.
 
 ## Gamification
-- **Dagdoelen**: calorieën binnen 10 %, eiwit, water, gewogen, training (of rustdag). Alles gehaald = perfecte dag (+100 XP + streakbonus).
+- **Dagdoelen**: calorieën binnen 7 %, eiwit, water, gewogen, training (of rustdag). Alles gehaald = perfecte dag (+100 XP + streakbonus).
 - **Streak**: aantal perfecte dagen op rij.
 - **Uitdaging van de dag**: wisselt per dag (eiwitboost, volume, sets, vroege weging, …), +30 tot +70 XP.
-- **XP**: maaltijd 10, water 5, weging 25, training 60 + 2 per set, PR 40.
+- **XP**: maaltijd 10 (max. 6 per dag), water 5 (enkel tot je dagdoel), weging 25, training 60 + 2 per set, PR 40. Levels: 800 × (level − 1)^2,1 XP (level 5 bij 14.700, 10 bij 80.700, 20 bij 387.700).
 - **Badges**: 18 stuks, met voortgangsring voor wat nog te halen is.
 
 ## Foto's bij oefeningen

@@ -1,6 +1,8 @@
 @import "tailwindcss";
 
 @custom-variant dark (&:where(.dark, .dark *));
+/* Liggende gsm: breed en laag. Navigatie gaat dan naar een zijbalk en schermen krijgen twee kolommen. */
+@custom-variant short (@media (orientation: landscape) and (max-height: 520px));
 
 :root {
   /* Palet: #0E0B1D #2A1E4D #5A3B8C #8B7CC7 #C9C2E3 #3A3A52 */
@@ -123,6 +125,11 @@
 
 .safe-top { padding-top: env(safe-area-inset-top); }
 .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 104px); }
+.safe-x { padding-left: env(safe-area-inset-left); padding-right: env(safe-area-inset-right); }
+@media (orientation: landscape) and (max-height: 520px) {
+  /* Geen onderste navigatiebalk in liggende stand: minder ruimte onderaan nodig. */
+  .safe-bottom { padding-bottom: calc(env(safe-area-inset-bottom) + 24px); }
+}
 
 @keyframes spectrum-mc-fade { from { opacity: 0; transform: scale(0.6); } to { opacity: 1; transform: scale(1); } }
 @keyframes pulse-ring { 0% { box-shadow: 0 0 0 0 color-mix(in oklch, var(--primary) 55%, transparent); } 100% { box-shadow: 0 0 0 14px transparent; } }

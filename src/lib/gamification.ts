@@ -14,11 +14,11 @@ export const XP = {
 } as const;
 
 /**
- * XP nodig voor een level: 600 × (level − 1)^1,8 (afgerond op 10).
- * Level 2 bij 600 XP, 3 bij 2.090, 5 bij 7.300, 10 bij 31.200, 15 bij 69.400, 20 bij 120.800.
- * Een perfecte dag levert zo'n 300-400 XP: level 10 vraagt dus ruim twee maanden volhouden, level 20 bijna een jaar.
+ * XP nodig voor een level: 800 × (level − 1)^2,1 (afgerond op 10).
+ * Level 2 bij 800 XP, 3 bij 3.430, 5 bij 14.700, 10 bij 80.500, 15 bij 201.000, 20 bij 385.000, 30 bij 940.000.
+ * Een perfecte dag levert hooguit zo'n 350 XP: level 5 vraagt ~6 weken, level 10 ~8 maanden, level 20 ~3 jaar.
  */
-export const xpForLevel = (level: number) => (level <= 1 ? 0 : Math.round((600 * (level - 1) ** 1.8) / 10) * 10);
+export const xpForLevel = (level: number) => (level <= 1 ? 0 : Math.round((800 * (level - 1) ** 2.1) / 10) * 10);
 export const levelFromXp = (xp: number) => {
   let level = 1;
   while (xpForLevel(level + 1) <= Math.max(0, xp)) level++;

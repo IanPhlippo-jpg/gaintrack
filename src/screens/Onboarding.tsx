@@ -255,7 +255,7 @@ export function Onboarding() {
   };
 
   return (
-    <div className="mx-auto flex h-full w-full max-w-md flex-col bg-background safe-top">
+    <div className="mx-auto flex h-full w-full max-w-md flex-col bg-background safe-top safe-x short:max-w-2xl">
       <div className="flex items-center justify-between px-6 pt-6">
         <div className="flex items-center gap-2">
           <div className="grid size-9 place-items-center rounded-xl bg-primary text-primary-foreground">

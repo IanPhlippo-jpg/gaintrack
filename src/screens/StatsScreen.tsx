@@ -24,9 +24,9 @@ const tooltipStyle = { contentStyle: { background: "var(--popover)", border: "1p
 export function StatsScreen() {
   const [tab, setTab] = React.useState<StatsTab>("overzicht");
   return (
-    <div>
-      <PageHeader title="Statistieken" subtitle="Jouw persoonlijke vooruitgang" />
-      <Section>
+    <div className="short:grid short:grid-cols-2 short:items-start short:gap-x-2">
+      <PageHeader title="Statistieken" subtitle="Jouw persoonlijke vooruitgang" className="short:col-span-2" />
+      <Section className="short:col-span-2">
         <AnimatedTabs<StatsTab> variant="segment" activeTab={tab} onChange={setTab} tabs={[{ id: "overzicht", label: "Overzicht" }, { id: "kracht", label: "Kracht" }, { id: "voeding", label: "Voeding" }, { id: "badges", label: "Badges" }]} />
       </Section>
       {tab === "overzicht" && <Overview />}

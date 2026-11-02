@@ -25,13 +25,13 @@ export function Drawer({ open, onOpenChange, title, description, children, class
         <Vaul.Overlay className="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px]" />
         <Vaul.Content
           className={cn(
-            "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-[28px] border-t border-border bg-popover text-popover-foreground outline-none",
+            "fixed inset-x-0 bottom-0 z-50 flex flex-col rounded-t-[28px] border-t border-border bg-popover text-popover-foreground outline-none short:mx-auto short:max-w-[760px] short:rounded-t-[20px]",
             "shadow-[0_-24px_64px_-28px_rgba(0,0,0,0.6)]",
-            full ? "h-[96dvh]" : "max-h-[92dvh]",
+            full ? "h-[96dvh] short:h-[94dvh]" : "max-h-[92dvh]",
             className,
           )}
         >
-          <div className="flex shrink-0 flex-col items-center px-4 pb-1 pt-3">
+          <div className="flex shrink-0 flex-col items-center px-4 pb-1 pt-3 short:pb-0 short:pt-2">
             <span className="h-1.5 w-10 rounded-full bg-muted-foreground/35" />
           </div>
           {(title || description) && (

@@ -41,9 +41,9 @@ export function NutritionScreen() {
   const entriesByMeal = (meal: MealType) => n.entries.filter((e) => e.meal === meal);
 
   return (
-    <div>
-      <PageHeader title="Voeding" subtitle={fmtDay(day)} />
-      <Section>
+    <div className="short:grid short:grid-cols-2 short:items-start short:gap-x-2">
+      <PageHeader title="Voeding" subtitle={fmtDay(day)} className="short:col-span-2" />
+      <Section className="short:col-span-2">
         <WeeklyDatePicker date={fromKey(day)} setDate={(d) => setDay(dayKey(d))} markers={markers} />
       </Section>
 
@@ -68,7 +68,7 @@ export function NutritionScreen() {
             <div className="flex items-baseline justify-between">
               <p className="font-bold">Water</p>
               <p className="text-sm tabular-nums text-muted-foreground">
-                <span className="font-bold text-foreground">{(water / 1000).toFixed(2)}</span> / {(g.waterMl / 1000).toFixed(1)} l
+                <span className="font-bold text-foreground">{(water / 1000).toLocaleString("nl-BE", { maximumFractionDigits: 2 })}</span> / {(g.waterMl / 1000).toLocaleString("nl-BE", { maximumFractionDigits: 2 })} l
               </p>
             </div>
             <div className="mt-1.5 h-2 w-full overflow-hidden rounded-full bg-muted">
