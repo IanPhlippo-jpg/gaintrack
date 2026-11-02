@@ -9,6 +9,7 @@ import { levelProgress, levelTitle } from "@/lib/gamification";
 import { totalXp } from "@/lib/stats";
 import type { Activity, Goals, Profile } from "@/store/types";
 import { cn, fmtKg } from "@/lib/utils";
+import { AccountSection, AdminSection } from "@/screens/AccountSection";
 
 const ACTIVITIES: { v: Activity; l: string }[] = [
   { v: "zittend", l: "Zittend" },
@@ -82,6 +83,8 @@ export function ProfileDrawer({ open, onOpenChange }: { open: boolean; onOpenCha
         <p className="-mt-3 text-xs text-muted-foreground">
           {lp.current.toLocaleString("nl-BE")} / {lp.needed.toLocaleString("nl-BE")} XP tot level {lp.level + 1}
         </p>
+
+        <AccountSection />
 
         <div>
           <label className="mb-1.5 block text-sm font-semibold">Naam</label>
@@ -160,9 +163,11 @@ export function ProfileDrawer({ open, onOpenChange }: { open: boolean; onOpenCha
           </div>
         </div>
 
+        <AdminSection />
+
         <div className="rounded-2xl border border-destructive/40 p-4">
           <p className="text-sm font-semibold">Alles wissen</p>
-          <p className="mb-3 text-xs text-muted-foreground">Verwijdert al je logs, trainingen en XP op dit toestel en start de quiz opnieuw.</p>
+          <p className="mb-3 text-xs text-muted-foreground">Verwijdert de logs, trainingen en XP van dit account op dit toestel en start de quiz opnieuw. Je account en pincode blijven bestaan.</p>
           {confirmReset ? (
             <div className="flex gap-2">
               <Button variant="destructive" size="sm" onClick={() => { resetAll(); onOpenChange(false); setConfirmReset(false); }}>

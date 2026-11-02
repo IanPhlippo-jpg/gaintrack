@@ -1,6 +1,6 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
-import { appStorage } from "./storage";
+import { accountStorage } from "@/store/storage";
 import type {
   Challenge, Exercise, Food, FoodEntry, Goals, MealType, Profile, Routine, SetLog, Settings, WeightEntry, Workout, XpEvent,
 } from "./types";
@@ -330,7 +330,9 @@ export const useStore = create<AppState>()(
     }),
     {
       name: "gaintrack-v1",
-      storage: createJSONStorage(() => appStorage),
+      storage: createJSONStorage(() => accountStorage),
+      // Pas laden nadat het account op dit toestel bekend is (zie AccountGate).
+      skipHydration: true,
       partialize: (s) => ({ ...s, lastCelebration: null }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<AppState>;

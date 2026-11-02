@@ -90,7 +90,7 @@ export function ActiveWorkout({ onFinished }: { onFinished: (w: Workout) => void
           onClick={() => state.setSettings({ restEnabled: !state.settings.restEnabled })}
           aria-label={state.settings.restEnabled ? "Rusttimer uitzetten" : "Rusttimer aanzetten"}
           title={state.settings.restEnabled ? `Rusttimer aan (${state.settings.restSec}s)` : "Rusttimer uit"}
-          className={cn("grid size-10 place-items-center rounded-full", state.settings.restEnabled ? "bg-orange-500/20 text-orange-400" : "bg-muted text-muted-foreground")}
+          className={cn("grid size-10 place-items-center rounded-full", state.settings.restEnabled ? "bg-primary/20 text-primary" : "bg-muted text-muted-foreground")}
         >
           <Timer className="size-5" />
         </button>

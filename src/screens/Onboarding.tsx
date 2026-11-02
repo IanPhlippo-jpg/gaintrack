@@ -12,6 +12,7 @@ import { SEED_EXERCISES } from "@/data/exercises";
 import type { Activity, Goals, Profile } from "@/store/types";
 import { WEEKDAYS_NL } from "@/lib/date";
 import { cn } from "@/lib/utils";
+import { useAccount } from "@/screens/LockScreen";
 
 type Answers = {
   name: string;
@@ -131,9 +132,10 @@ function ProgramCard({ program, selected, onSelect, recommended }: { program: Pr
 
 export function Onboarding() {
   const complete = useStore((s) => s.completeOnboarding);
+  const { account } = useAccount();
   const [step, setStep] = React.useState(0);
   const [dir, setDir] = React.useState(1);
-  const [a, setA] = React.useState<Answers>({ name: "", gender: "man", age: 30, heightCm: 180, weight: 80, goalType: "maintain", activity: "matig", daysPerWeek: 3, experience: "beginner", programId: "" });
+  const [a, setA] = React.useState<Answers>({ name: account?.name ?? "", gender: "man", age: 30, heightCm: 180, weight: 80, goalType: "maintain", activity: "matig", daysPerWeek: 3, experience: "beginner", programId: "" });
   const [goals, setGoals] = React.useState<Goals | null>(null);
   const set = <K extends keyof Answers>(k: K, v: Answers[K]) => setA((x) => ({ ...x, [k]: v }));
 

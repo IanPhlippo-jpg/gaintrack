@@ -13,6 +13,7 @@ import { WeightScreen } from "@/screens/WeightScreen";
 import { StatsScreen } from "@/screens/StatsScreen";
 import { Onboarding } from "@/screens/Onboarding";
 import { ProfileDrawer } from "@/screens/ProfileDrawer";
+import { AccountGate } from "@/screens/LockScreen";
 
 export type Tab = "vandaag" | "voeding" | "training" | "gewicht" | "stats";
 
@@ -71,7 +72,9 @@ function Shell() {
 export default function App() {
   return (
     <ConfettiProvider>
-      <Shell />
+      <AccountGate>
+        <Shell />
+      </AccountGate>
     </ConfettiProvider>
   );
 }

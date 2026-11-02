@@ -62,7 +62,7 @@ export function RestTimer({ timer, className }: { timer: ReturnType<typeof useRe
       initial={{ y: 40, opacity: 0 }}
       animate={{ y: 0, opacity: 1 }}
       exit={{ y: 40, opacity: 0 }}
-      className={cn("relative overflow-hidden rounded-3xl bg-gradient-to-b from-orange-500 to-red-600 p-4 text-white shadow-[0_16px_40px_-16px_rgba(234,88,12,0.7)]", className)}
+      className={cn("relative overflow-hidden rounded-3xl bg-gradient-to-b from-[#5A3B8C] to-[#8B7CC7] p-4 text-white shadow-[0_16px_40px_-16px_rgba(139,124,199,0.7)]", className)}
     >
       <div className="absolute inset-x-0 bottom-0 h-1 bg-white/20">
         <div className="h-full bg-white transition-[width] duration-300" style={{ width: `${pct}%` }} />

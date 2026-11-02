@@ -37,7 +37,7 @@ export function ExerciseMedia({ exercise, size = "card", auto = size !== "thumb"
 
   return (
     <div
-      className={cn("relative shrink-0 select-none overflow-hidden bg-[#e9e6df] dark:bg-[#1c1f26]", sizeClass[size], className)}
+      className={cn("relative shrink-0 select-none overflow-hidden bg-[#ECE8F5] dark:bg-[#2A1E4D]", sizeClass[size], className)}
       onClick={(e) => {
         if (!hasDb || exercise.photo) return;
         e.stopPropagation();

@@ -4,7 +4,7 @@
 import * as React from "react";
 import { animate } from "motion/react";
 
-const colors = ["#26ccff", "#a25afd", "#ff5e7e", "#88ff5a", "#fcff42", "#ffa62d", "#ff36ff"];
+const colors = ["#C9C2E3", "#8B7CC7", "#5A3B8C", "#FFFFFF", "#E6E0F5", "#B3A7DB", "#8B7CC7"];
 const shapes = ["circle", "rect", "rect", "strip", "strip"] as const;
 const keyframeCount = 40;
 const popWindow = 0.08;

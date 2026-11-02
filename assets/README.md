@@ -1,0 +1,1 @@
+Bronbestanden voor iconen en splash. Opnieuw genereren: `node <scratch>/make-icons.cjs <projectmap>` (script maakt logo.png, splash.png en public/icon-*.png met sharp), daarna `npx @capacitor/assets generate --ios --iconBackgroundColor '#0E0B1D' --splashBackgroundColor '#0E0B1D'`.
