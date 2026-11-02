@@ -79,3 +79,8 @@
 - [x] Levelcurve: 600 × (level−1)^1,8 XP (level 10 bij 31.320 XP, level 20 bij 120.200 XP)
 - [x] Supabase: via toegangstoken van Ian; bestaand project zdiycofagksxoetewpjb (eu-west-1) gebruikt, schema.sql uitgevoerd, REST getest, VITE_SUPABASE_URL/ANON_KEY als Actions-variabelen, Pages herbouwd
 - [x] Live gezet (04f2242 + herbouw met Supabase-variabelen)
+
+## Weekbalkjes en klassement verversen (2026-11-02)
+- [x] "Deze week" toont maandag t.e.m. zondag; dag zonder registratie = 0 % (rustdag telt niet vanzelf); toekomstige dagen gedimd
+- [x] Klassement ververst bij openen van de app en elke minuut (scores van andere gsm's)
+- [x] Live gezet

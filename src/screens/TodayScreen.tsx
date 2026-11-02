@@ -11,7 +11,7 @@ import { useStore } from "@/store/useStore";
 import { useNav } from "@/App";
 import { challengeStatus, currentStreak, dailyGoals, routinesForDay, totalXp, xpOnDay } from "@/lib/stats";
 import { levelProgress, levelTitle, motivation } from "@/lib/gamification";
-import { fmtDay, lastNDays, todayKey, WEEKDAYS_NL, weekdayOf } from "@/lib/date";
+import { fmtDay, shiftKey, todayKey, WEEKDAYS_NL, weekdayOf, weekStartKey } from "@/lib/date";
 import { cn } from "@/lib/utils";
 
 export function TodayScreen() {
@@ -31,10 +31,15 @@ export function TodayScreen() {
   const hour = new Date().getHours();
   const greeting = hour < 12 ? "Goeiemorgen" : hour < 18 ? "Goeiemiddag" : "Goeienavond";
 
-  const week = lastNDays(7).map((d) => {
+  // Huidige week van maandag tot zondag. Een dag zonder enige registratie staat op 0 %;
+  // een rustdag telt pas als "gehaald" zodra er die dag iets gelogd is. Toekomstige dagen zijn gedimd.
+  const monday = weekStartKey(today);
+  const week = Array.from({ length: 7 }, (_, i) => shiftKey(monday, i)).map((d) => {
+    const future = d > today;
+    const logged = state.foodLog.some((e) => e.day === d) || (state.water[d] ?? 0) > 0 || state.weights.some((w) => w.day === d) || state.workouts.some((w) => w.day === d && w.endedAt);
     const g = dailyGoals(state, d);
-    const v = (g.filter((x) => x.done).length / g.length) * 100;
-    return { day: WEEKDAYS_NL[weekdayOf(d)], value: v, highlight: d === today, label: state.perfectDays[d] ? "★" : undefined };
+    const v = future || !logged ? 0 : (g.filter((x) => x.done).length / g.length) * 100;
+    return { day: WEEKDAYS_NL[weekdayOf(d)], value: v, highlight: d === today, muted: future, label: state.perfectDays[d] ? "★" : undefined };
   });
 
   return (

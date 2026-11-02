@@ -22,14 +22,23 @@ function useLeaderboard(offset: number) {
   const workouts = useStore((s) => s.workouts);
   const perfectDays = useStore((s) => s.perfectDays);
   const [rows, setRows] = React.useState<WeekScore[] | null>(null);
+  const [tick, setTick] = React.useState(0);
   const weekStart = weekStartWithOffset(todayKey(), offset);
+
+  // Ook verversen als de app weer in beeld komt en elke minuut, zodat scores van andere gsm's binnenkomen.
+  React.useEffect(() => {
+    const bump = () => { if (document.visibilityState === "visible") setTick((t) => t + 1); };
+    document.addEventListener("visibilitychange", bump);
+    const t = setInterval(bump, 60_000);
+    return () => { document.removeEventListener("visibilitychange", bump); clearInterval(t); };
+  }, []);
 
   React.useEffect(() => {
     if (!account) return;
     let alive = true;
     void weekLeaderboard(registry, { id: account.id, state: { xpEvents, workouts, perfectDays } }, weekStart).then((r) => alive && setRows(r));
     return () => { alive = false; };
-  }, [registry, account, xpEvents, workouts, perfectDays, weekStart]);
+  }, [registry, account, xpEvents, workouts, perfectDays, weekStart, tick]);
 
   return { rows, weekStart };
 }

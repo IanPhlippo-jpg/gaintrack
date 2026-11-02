@@ -8,6 +8,8 @@ export interface WeeklyBarDatum {
   /** 0..100 */
   value: number;
   highlight?: boolean;
+  /** Nog niet aan de beurt (toekomstige dag): gedimd */
+  muted?: boolean;
   label?: string;
 }
 
@@ -15,7 +17,7 @@ export function WeeklyBars({ data, className, color = "bg-primary" }: { data: We
   return (
     <div className={cn("grid grid-cols-7 gap-1.5", className)}>
       {data.map((item, index) => (
-        <div key={index} className={cn("rounded-xl p-1.5 text-center ring-1 ring-border", item.highlight && "ring-primary/60")}>
+        <div key={index} className={cn("rounded-xl p-1.5 text-center ring-1 ring-border", item.highlight && "ring-primary/60", item.muted && "opacity-40")}>
           <div className={cn("text-[11px]", item.highlight ? "font-bold text-primary" : "text-muted-foreground")}>{item.day}</div>
           <div className="relative mt-1 h-14 overflow-hidden rounded-md bg-muted">
             <div className={cn("absolute inset-x-0 bottom-0 rounded-md transition-[height] duration-700", color)} style={{ height: `${Math.max(0, Math.min(100, item.value))}%` }} />
