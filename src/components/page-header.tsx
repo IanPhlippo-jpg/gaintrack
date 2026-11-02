@@ -13,7 +13,7 @@ export function PageHeader({ title, subtitle, right, className }: { title: strin
   return (
     <header className={cn("flex items-center justify-between gap-3 px-5 pb-3 pt-4", className)}>
       <div className="min-w-0">
-        {subtitle && <p className="truncate text-xs font-medium capitalize text-muted-foreground">{subtitle}</p>}
+        {subtitle && <p className="truncate text-xs font-medium text-muted-foreground first-letter:uppercase">{subtitle}</p>}
         <h1 className="truncate text-2xl font-extrabold tracking-tight">{title}</h1>
       </div>
       <div className="flex items-center gap-2">

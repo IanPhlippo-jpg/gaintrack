@@ -18,6 +18,8 @@ export interface Food {
   portion: number;
   portionLabel?: string;
   custom?: boolean;
+  /** EAN/UPC-code, als het product gescand werd */
+  barcode?: string;
 }
 
 export interface FoodEntry {
@@ -102,11 +104,19 @@ export interface Goals {
   weeklyWorkouts: number;
 }
 
+export type Activity = "zittend" | "licht" | "matig" | "actief" | "zeer";
+
 export interface Profile {
   name: string;
+  gender: "man" | "vrouw" | "anders";
+  age: number;
   heightCm: number;
   startWeight: number;
   goalType: "cut" | "bulk" | "maintain";
+  activity: Activity;
+  experience: "beginner" | "gevorderd" | "ervaren";
+  daysPerWeek: number;
+  programId?: string;
 }
 
 export interface XpEvent {

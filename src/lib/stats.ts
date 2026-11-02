@@ -50,9 +50,9 @@ export function dailyGoals(s: AppState, day: string): DailyGoal[] {
       hint: n.protein >= g.protein ? "Eiwitdoel gehaald" : `Nog ${Math.round(g.protein - n.protein)} g eiwit`,
     },
     {
-      id: "water", label: "Water", value: water, target: g.waterMl, unit: "ml", icon: "💧",
+      id: "water", label: "Water", value: water / 1000, target: g.waterMl / 1000, unit: "l", icon: "💧",
       done: water >= g.waterMl, pct: Math.min(100, (water / g.waterMl) * 100),
-      hint: water >= g.waterMl ? "Goed gehydrateerd" : `Nog ${((g.waterMl - water) / 1000).toFixed(1)} l`,
+      hint: water >= g.waterMl ? "Goed gehydrateerd" : `Nog ${((g.waterMl - water) / 1000).toLocaleString("nl-BE", { maximumFractionDigits: 2 })} l`,
     },
     {
       id: "weight", label: "Gewicht", value: weighed ? 1 : 0, target: 1, unit: "", icon: "⚖️",

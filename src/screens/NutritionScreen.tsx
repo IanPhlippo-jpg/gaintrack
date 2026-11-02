@@ -1,5 +1,7 @@
 import * as React from "react";
-import { Droplets, Plus, Search, Star, Trash2, ChevronRight, Minus } from "lucide-react";
+import { Droplets, Plus, Search, Star, Trash2, ChevronRight, Minus, ScanBarcode, Loader2 } from "lucide-react";
+import { BarcodeScanner } from "@/components/barcode-scanner";
+import { lookupBarcode } from "@/lib/openfoodfacts";
 import { PageHeader, Section, EmptyState } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -73,11 +75,11 @@ export function NutritionScreen() {
             </div>
           </div>
           <div className="flex shrink-0 gap-1">
-            <Button variant="secondary" size="icon-sm" onClick={() => state.addWater(day, -250)} aria-label="250 ml minder">
+            <Button variant="secondary" size="icon-sm" onClick={() => state.addWater(day, -250)} aria-label="Kwart liter minder">
               <Minus className="size-4" />
             </Button>
             <Button size="sm" onClick={() => state.addWater(day, 250)}>
-              +250
+              +0,25 l
             </Button>
           </div>
         </Card>
@@ -137,6 +139,8 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
   const [selected, setSelected] = React.useState<Food | null>(null);
   const [grams, setGrams] = React.useState(100);
   const [creating, setCreating] = React.useState(false);
+  const [scanning, setScanning] = React.useState(false);
+  const [lookup, setLookup] = React.useState<{ code: string; status: "busy" | "notfound" } | null>(null);
   const foods = allFoods(state);
 
   React.useEffect(() => {
@@ -144,8 +148,35 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
       setQ("");
       setSelected(null);
       setCreating(false);
+      setScanning(false);
+      setLookup(null);
     }
   }, [meal]);
+
+  const onBarcode = React.useCallback(
+    async (code: string) => {
+      setScanning(false);
+      const known = allFoods(useStore.getState()).find((f) => f.barcode === code);
+      if (known) {
+        setSelected(known);
+        setGrams(known.portion);
+        return;
+      }
+      setLookup({ code, status: "busy" });
+      try {
+        const found = await lookupBarcode(code);
+        if (found) {
+          const f = useStore.getState().addCustomFood(found);
+          setLookup(null);
+          setSelected(f);
+          setGrams(f.portion);
+        } else setLookup({ code, status: "notfound" });
+      } catch {
+        setLookup({ code, status: "notfound" });
+      }
+    },
+    [],
+  );
 
   const recentIds = React.useMemo(() => {
     const ids: string[] = [];
@@ -217,35 +248,65 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
         </div>
       ) : creating ? (
         <CustomFoodForm
+          barcode={lookup?.code}
           onDone={(f) => {
             setCreating(false);
+            setLookup(null);
             pick(f);
           }}
-          onCancel={() => setCreating(false)}
+          onCancel={() => { setCreating(false); setLookup(null); }}
         />
+      ) : lookup ? (
+        <div className="flex flex-col items-center gap-4 py-10 text-center">
+          {lookup.status === "busy" ? (
+            <>
+              <Loader2 className="size-10 animate-spin text-primary" />
+              <p className="font-semibold">Product opzoeken…</p>
+              <p className="text-xs text-muted-foreground">Barcode {lookup.code}</p>
+            </>
+          ) : (
+            <>
+              <ScanBarcode className="size-10 text-muted-foreground" />
+              <p className="font-semibold">Product niet gevonden</p>
+              <p className="text-sm text-muted-foreground">Barcode {lookup.code} staat nog niet in Open Food Facts. Voeg het zelf toe, dan herkent de app het voortaan.</p>
+              <div className="flex gap-2">
+                <Button variant="secondary" onClick={() => setLookup(null)}>
+                  Terug
+                </Button>
+                <Button onClick={() => setCreating(true)}>
+                  <Plus className="size-4" /> Zelf toevoegen
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       ) : (
         <div className="space-y-3">
-          <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
-            <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Zoek voedingsmiddel…" className="pl-10" autoFocus />
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <AnimatedTabs<PickerTab>
-              variant="pill"
-              activeTab={tab}
-              onChange={setTab}
-              tabs={[
-                { id: "alles", label: "Alles" },
-                { id: "favoriet", label: "★" },
-                { id: "recent", label: "Recent" },
-                { id: "eigen", label: "Eigen" },
-              ]}
-              className="text-xs"
-            />
-            <Button variant="outline" size="sm" onClick={() => setCreating(true)}>
-              <Plus className="size-3.5" /> Nieuw
+          <div className="flex gap-2">
+            <div className="relative flex-1">
+              <Search className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-muted-foreground" />
+              <Input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Zoek voedingsmiddel…" className="pl-10" />
+            </div>
+            <Button className="h-12 shrink-0 px-3" onClick={() => setScanning(true)} aria-label="Barcode scannen">
+              <ScanBarcode className="size-5" />
+            </Button>
+            <Button variant="outline" className="h-12 shrink-0 px-3" onClick={() => setCreating(true)} aria-label="Nieuw voedingsmiddel">
+              <Plus className="size-5" />
             </Button>
           </div>
+          <BarcodeScanner open={scanning} onClose={() => setScanning(false)} onDetected={onBarcode} />
+          <AnimatedTabs<PickerTab>
+            variant="segment"
+            activeTab={tab}
+            onChange={setTab}
+            tabs={[
+              { id: "alles", label: "Alles" },
+              { id: "favoriet", label: "★ Favoriet" },
+              { id: "recent", label: "Recent" },
+              { id: "eigen", label: "Eigen" },
+            ]}
+            className="text-xs [&_button]:px-2"
+          />
           {list.length === 0 ? (
             <EmptyState icon="🔍" title="Niets gevonden" desc="Maak het zelf aan met 'Nieuw'." />
           ) : (
@@ -276,13 +337,18 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
   );
 }
 
-function CustomFoodForm({ onDone, onCancel }: { onDone: (f: Food) => void; onCancel: () => void }) {
+function CustomFoodForm({ onDone, onCancel, barcode }: { onDone: (f: Food) => void; onCancel: () => void; barcode?: string }) {
   const addCustomFood = useStore((s) => s.addCustomFood);
   const [name, setName] = React.useState("");
   const [vals, setVals] = React.useState({ kcal: 0, protein: 0, carbs: 0, fat: 0, portion: 100 });
   const valid = name.trim().length > 1 && vals.kcal > 0;
   return (
     <div className="space-y-4">
+      {barcode && (
+        <p className="flex items-center gap-2 rounded-2xl bg-muted p-3 text-xs text-muted-foreground">
+          <ScanBarcode className="size-4" /> Wordt gekoppeld aan barcode {barcode}
+        </p>
+      )}
       <div>
         <label className="mb-1.5 block text-sm font-semibold">Naam</label>
         <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="bv. Eiwitshake aardbei" autoFocus />
@@ -308,7 +374,7 @@ function CustomFoodForm({ onDone, onCancel }: { onDone: (f: Food) => void; onCan
         <Button variant="secondary" size="lg" onClick={onCancel}>
           Annuleer
         </Button>
-        <Button size="lg" className="flex-1" disabled={!valid} onClick={() => onDone(addCustomFood({ name: name.trim(), ...vals }))}>
+        <Button size="lg" className="flex-1" disabled={!valid} onClick={() => onDone(addCustomFood({ name: name.trim(), ...vals, barcode }))}>
           Opslaan en kiezen
         </Button>
       </div>

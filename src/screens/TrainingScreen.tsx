@@ -13,7 +13,8 @@ import { ActiveWorkout } from "./ActiveWorkout";
 import { CustomExerciseForm, ExercisePicker, useExerciseSearch, dbToExercise } from "./ExercisePicker";
 import { useStore } from "@/store/useStore";
 import type { Exercise, Routine, Workout } from "@/store/types";
-import { EQUIPMENT, MUSCLES, MUSCLE_GROUPS, ROUTINE_TEMPLATES } from "@/data/exercises";
+import { EQUIPMENT, MUSCLES, MUSCLE_GROUPS } from "@/data/exercises";
+import { PROGRAMS, type Program } from "@/data/programs";
 import { exerciseById, lastPerformance, personalRecords, routinesForDay, strengthHistory } from "@/lib/stats";
 import { durationMin, workoutSets, workoutVolume } from "@/lib/calc";
 import { fmtDay, fmtShort, todayKey, WEEKDAYS_NL } from "@/lib/date";
@@ -72,7 +73,7 @@ function RoutinesTab() {
             <Plus className="size-4" /> Nieuw schema
           </Button>
           <Button variant="outline" size="lg" className="border-dashed" onClick={() => setTemplates(true)}>
-            Sjablonen
+            Programma's
           </Button>
         </div>
         {planned.length > 0 && (
@@ -84,25 +85,71 @@ function RoutinesTab() {
 
       <RoutineEditor routine={editing} onClose={() => setEditing(null)} />
 
-      <Drawer open={templates} onOpenChange={setTemplates} title="Sjablonen" description="Voeg een kant-en-klaar schema toe en pas het daarna aan.">
-        <div className="space-y-2">
-          {ROUTINE_TEMPLATES.map((t) => {
-            const exists = state.routines.some((r) => r.id === t.id);
+      <ProgramsDrawer open={templates} onClose={() => setTemplates(false)} />
+    </>
+  );
+}
+
+type ProgramGroup = "vrouw" | "man" | "iedereen";
+
+function ProgramsDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
+  const state = useStore();
+  const [group, setGroup] = React.useState<ProgramGroup>(state.profile.gender === "vrouw" ? "vrouw" : state.profile.gender === "man" ? "man" : "iedereen");
+  const [confirm, setConfirm] = React.useState<Program | null>(null);
+  const list = PROGRAMS.filter((p) => p.gender === group).sort((a, b) => a.days - b.days);
+  const activeId = state.profile.programId;
+
+  return (
+    <>
+      <Drawer open={open} onOpenChange={(o) => !o && onClose()} title="Trainingsprogramma's" description="Kant-en-klare schema's, opgesplitst voor vrouwen en mannen. Je kunt elk schema daarna aanpassen." full>
+        <AnimatedTabs<ProgramGroup> variant="segment" activeTab={group} onChange={setGroup} tabs={[{ id: "vrouw", label: "Vrouwen" }, { id: "man", label: "Mannen" }, { id: "iedereen", label: "Iedereen" }]} className="mb-3" />
+        <div className="space-y-3">
+          {list.map((p) => {
+            const isActive = activeId === p.id;
             return (
-              <div key={t.id} className="flex items-center gap-3 rounded-2xl border bg-card p-3">
-                <span className="text-2xl">{t.emoji}</span>
-                <div className="min-w-0 flex-1">
-                  <p className="font-bold">{t.name}</p>
-                  <p className="text-xs text-muted-foreground">
-                    {t.exercises.length} oefeningen · {t.days.map((d) => WEEKDAYS_NL[d]).join(", ")}
-                  </p>
+              <div key={p.id} className={cn("rounded-2xl border bg-card p-4", isActive && "border-primary bg-primary/10")}>
+                <div className="flex items-start justify-between gap-2">
+                  <div className="min-w-0">
+                    <p className="font-bold">
+                      {p.name} {isActive && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">Actief</span>}
+                    </p>
+                    <p className="text-xs text-muted-foreground">
+                      {p.days} dagen · {p.level} · {p.focus}
+                    </p>
+                  </div>
+                  <span className="shrink-0 text-2xl">{p.routines[0]?.emoji}</span>
                 </div>
-                <Button size="sm" disabled={exists} onClick={() => state.saveRoutine({ ...t, id: t.id })}>
-                  {exists ? "Toegevoegd" : "Toevoegen"}
-                </Button>
+                <p className="mt-1.5 text-sm text-muted-foreground">{p.desc}</p>
+                <div className="mt-3 space-y-1">
+                  {p.routines.map((r) => (
+                    <div key={r.id} className="flex items-center gap-2 text-xs">
+                      <span className="w-14 shrink-0 font-semibold text-muted-foreground">{r.days.map((d) => WEEKDAYS_NL[d]).join("/")}</span>
+                      <span className="truncate">{r.name}</span>
+                      <span className="ml-auto shrink-0 text-muted-foreground">{r.exercises.length} oef.</span>
+                    </div>
+                  ))}
+                </div>
+                <div className="mt-3 flex gap-2">
+                  <Button size="sm" className="flex-1" disabled={isActive} onClick={() => setConfirm(p)}>
+                    {isActive ? "In gebruik" : "Gebruik dit programma"}
+                  </Button>
+                  <Button size="sm" variant="secondary" onClick={() => { state.applyProgram(p.id, p.routines, false); onClose(); }}>
+                    Voeg toe
+                  </Button>
+                </div>
               </div>
             );
           })}
+        </div>
+      </Drawer>
+      <Drawer open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)} title="Programma wisselen?" description="Je huidige schema's worden vervangen. Je trainingshistoriek en records blijven bewaard.">
+        <div className="flex gap-2">
+          <Button size="lg" className="flex-1" onClick={() => { if (confirm) state.applyProgram(confirm.id, confirm.routines, true); setConfirm(null); onClose(); }}>
+            Ja, vervang
+          </Button>
+          <Button size="lg" variant="secondary" onClick={() => setConfirm(null)}>
+            Annuleer
+          </Button>
         </div>
       </Drawer>
     </>
@@ -417,7 +464,7 @@ function HistoryTab() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <p className="truncate text-sm font-bold">{w.name}</p>
-                  <p className="text-xs capitalize text-muted-foreground">
+                  <p className="text-xs text-muted-foreground first-letter:uppercase">
                     {fmtDay(w.day, "EEE d MMM")} · {durationMin(w)} min · {workoutSets(w)} sets · {workoutVolume(w).toLocaleString("nl-BE")} kg
                   </p>
                 </div>

@@ -11,7 +11,7 @@ import { WeeklyDatePicker } from "@/components/ui/weekly-date-picker";
 import { useStore } from "@/store/useStore";
 import { movingAverage, weeklyTrend } from "@/lib/calc";
 import { dayKey, daysBetween, fmtDay, fmtShort, fromKey, todayKey } from "@/lib/date";
-import { cn, round } from "@/lib/utils";
+import { cn, fmtKg, round } from "@/lib/utils";
 
 type Range = "30" | "90" | "365" | "all";
 
@@ -27,9 +27,9 @@ export function WeightScreen() {
 
   const existing = weights.find((w) => w.day === day);
   const latest = weights[weights.length - 1];
-  const [value, setValue] = React.useState(existing?.kg ?? latest?.kg ?? profile.startWeight);
+  const [value, setValue] = React.useState(round(existing?.kg ?? latest?.kg ?? profile.startWeight, 1));
   React.useEffect(() => {
-    setValue(existing?.kg ?? latest?.kg ?? profile.startWeight);
+    setValue(round(existing?.kg ?? latest?.kg ?? profile.startWeight, 1));
   }, [day, existing?.kg, latest?.kg, profile.startWeight]);
 
   const markers = React.useMemo(() => Object.fromEntries(weights.map((w) => [w.day, "done" as const])), [weights]);
@@ -51,7 +51,7 @@ export function WeightScreen() {
   for (let d = todayKey(); weighedDays.has(d); d = dayKey(new Date(fromKey(d).getTime() - 86400000))) weighStreak++;
 
   const save = () => {
-    logWeight(day, value);
+    logWeight(day, round(value, 1));
     setSaved(true);
     setTimeout(() => setSaved(false), 1500);
   };
@@ -65,7 +65,7 @@ export function WeightScreen() {
 
   return (
     <div>
-      <PageHeader title="Gewicht" subtitle={latest ? `Laatst: ${latest.kg.toLocaleString("nl-BE")} kg op ${fmtShort(latest.day)}` : "Nog geen metingen"} />
+      <PageHeader title="Gewicht" subtitle={latest ? `Laatste meting: ${fmtKg(latest.kg)} op ${fmtShort(latest.day)}` : `Startgewicht ${fmtKg(profile.startWeight)} · nog geen meting bevestigd`} />
 
       <Section>
         <WeeklyDatePicker date={fromKey(day)} setDate={(d) => setDay(dayKey(d))} markers={markers} maxDate={new Date()} />
@@ -73,7 +73,7 @@ export function WeightScreen() {
 
       <Section>
         <Card className="p-5">
-          <p className="mb-3 text-sm font-semibold capitalize text-muted-foreground">{existing ? `Meting van ${fmtDay(day, "EEEE d MMM")}` : `Weeg je op ${fmtDay(day, "EEEE d MMM")}`}</p>
+          <p className="mb-3 text-sm font-semibold text-muted-foreground">{existing ? `Meting van ${fmtDay(day, "EEEE d MMM")}` : `Weeg je op ${fmtDay(day, "EEEE d MMM")}`}</p>
           <NumberStepper value={value} onChange={setValue} step={0.1} min={30} max={300} unit="kg" size="lg" />
           <div className="mt-3 flex gap-2">
             {existing && (
@@ -141,10 +141,10 @@ export function WeightScreen() {
                 const d = prev ? w.kg - prev.kg : 0;
                 return (
                   <div key={w.day} className="flex items-center justify-between px-4 py-2.5 text-sm">
-                    <span className="capitalize text-muted-foreground">{fmtDay(w.day, "EEE d MMM")}</span>
+                    <span className="text-muted-foreground first-letter:uppercase">{fmtDay(w.day, "EEE d MMM")}</span>
                     <div className="flex items-center gap-3">
                       {prev && <span className={cn("text-xs tabular-nums", d <= 0 ? "text-primary" : "text-chart-5")}>{d > 0 ? "+" : ""}{d.toFixed(1)}</span>}
-                      <span className="font-bold tabular-nums">{w.kg.toLocaleString("nl-BE", { minimumFractionDigits: 1 })} kg</span>
+                      <span className="font-bold tabular-nums">{fmtKg(w.kg)}</span>
                     </div>
                   </div>
                 );

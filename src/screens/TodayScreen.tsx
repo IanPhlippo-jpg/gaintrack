@@ -58,10 +58,10 @@ export function TodayScreen() {
                 Nog {(lp.next - xp).toLocaleString("nl-BE")} XP tot level {lp.level + 1}
               </p>
               <div className="mt-2 flex items-center gap-2">
-                <span className="inline-flex items-center gap-1 rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">
+                <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">
                   <Zap className="size-3" /> +{todayXp} vandaag
                 </span>
-                <span className={cn("inline-flex items-center gap-1 rounded-full px-2 py-0.5 text-xs font-bold", streak > 0 ? "bg-chart-2/20 text-chart-2" : "bg-muted text-muted-foreground")}>
+                <span className={cn("inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold", streak > 0 ? "bg-chart-2/20 text-chart-2" : "bg-muted text-muted-foreground")}>
                   <Flame className="size-3" /> {streak} {streak === 1 ? "dag" : "dagen"} streak
                 </span>
               </div>
@@ -96,8 +96,8 @@ export function TodayScreen() {
               <div className="text-right">
                 {g.unit ? (
                   <p className="text-sm font-bold tabular-nums">
-                    {Math.round(g.value).toLocaleString("nl-BE")}
-                    <span className="text-xs font-medium text-muted-foreground">/{g.target.toLocaleString("nl-BE")} {g.unit}</span>
+                    {g.value.toLocaleString("nl-BE", { maximumFractionDigits: g.unit === "l" ? 2 : 0 })}
+                    <span className="text-xs font-medium text-muted-foreground">/{g.target.toLocaleString("nl-BE", { maximumFractionDigits: g.unit === "l" ? 2 : 0 })} {g.unit}</span>
                   </p>
                 ) : (
                   <ChevronRight className="size-4 text-muted-foreground" />
@@ -108,10 +108,10 @@ export function TodayScreen() {
         </Card>
         <div className="mt-3 flex gap-2">
           <Button variant="secondary" className="flex-1" onClick={() => state.addWater(today, 250)}>
-            <Droplets className="size-4 text-chart-4" /> +250 ml
+            <Droplets className="size-4 text-chart-4" /> +0,25 l water
           </Button>
           <Button variant="secondary" className="flex-1" onClick={() => state.addWater(today, 500)}>
-            <Droplets className="size-4 text-chart-4" /> +500 ml
+            <Droplets className="size-4 text-chart-4" /> +0,5 l water
           </Button>
         </div>
       </Section>

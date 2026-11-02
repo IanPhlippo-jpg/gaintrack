@@ -31,7 +31,9 @@ export interface AppState {
   lastCelebration: { id: string; title: string; subtitle?: string; xp?: number; at: number } | null;
 
   // profiel en doelen
-  completeOnboarding: (profile: Profile, goals: Goals, weightKg: number) => void;
+  completeOnboarding: (profile: Profile, goals: Goals, weightKg: number, routines?: Routine[]) => void;
+  /** Vervangt alle schema's door die van een programma */
+  applyProgram: (programId: string, routines: Routine[], replace: boolean) => void;
   setProfile: (p: Partial<Profile>) => void;
   setGoals: (g: Partial<Goals>) => void;
 
@@ -73,7 +75,7 @@ export interface AppState {
   resetAll: () => void;
 }
 
-const DEFAULT_PROFILE: Profile = { name: "", heightCm: 180, startWeight: 80, goalType: "maintain" };
+const DEFAULT_PROFILE: Profile = { name: "", gender: "man", age: 30, heightCm: 180, startWeight: 80, goalType: "maintain", activity: "matig", experience: "beginner", daysPerWeek: 3 };
 const DEFAULT_GOALS: Goals = { kcal: 2500, protein: 160, carbs: 280, fat: 80, waterMl: 2500, targetWeight: 80, weeklyWorkouts: 4 };
 
 const emptySet = (weight = 0, reps = 0): SetLog => ({ id: uid(), weight, reps, done: false });
@@ -99,15 +101,21 @@ export const useStore = create<AppState>()(
       challengesDone: {},
       lastCelebration: null,
 
-      completeOnboarding: (profile, goals, weightKg) => {
-        const day = todayKey();
+      completeOnboarding: (profile, goals, weightKg, routines) => {
+        // Het startgewicht wordt bewust niet als meting van vandaag geregistreerd:
+        // de gebruiker bevestigt zijn weging zelf op het gewichtsscherm.
         set((s) => ({
           onboarded: true,
-          profile: { ...profile, startWeight: weightKg },
+          profile: { ...profile, startWeight: round(weightKg, 1) },
           goals,
-          weights: s.weights.some((w) => w.day === day) ? s.weights : [...s.weights, { day, kg: weightKg, at: Date.now() }],
+          routines: routines ?? s.routines,
         }));
       },
+      applyProgram: (programId, routines, replace) =>
+        set((s) => ({
+          profile: { ...s.profile, programId },
+          routines: replace ? routines : [...s.routines.filter((r) => !routines.some((n) => n.id === r.id)), ...routines],
+        })),
       setProfile: (p) => set((s) => ({ profile: { ...s.profile, ...p } })),
       setGoals: (g) => set((s) => ({ goals: { ...s.goals, ...g } })),
 

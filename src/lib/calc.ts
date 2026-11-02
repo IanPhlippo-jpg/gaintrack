@@ -42,12 +42,22 @@ export function weeklyTrend(points: { x: number; y: number }[]): number | null {
   return (num / den) * 7;
 }
 
-/** Macro-advies op basis van gewicht en doel */
-export function suggestGoals(weightKg: number, goalType: "cut" | "bulk" | "maintain") {
-  const maintenance = Math.round(weightKg * 31);
-  const kcal = goalType === "cut" ? maintenance - 400 : goalType === "bulk" ? maintenance + 300 : maintenance;
-  const protein = Math.round(weightKg * 2);
+const ACTIVITY_FACTOR: Record<string, number> = { zittend: 1.2, licht: 1.375, matig: 1.55, actief: 1.725, zeer: 1.9 };
+
+/**
+ * Dagdoelen op basis van de quizantwoorden.
+ * Energie: Mifflin-St Jeor × activiteitsfactor, daarna -400 (afvallen) of +300 (aankomen).
+ * Eiwit 2 g/kg (2,2 bij afvallen), vet 27 % van de energie, koolhydraten de rest. Water 35 ml/kg.
+ */
+export function computeGoals(p: { gender: "man" | "vrouw" | "anders"; age: number; heightCm: number; activity: string; goalType: "cut" | "bulk" | "maintain" }, weightKg: number) {
+  const base = 10 * weightKg + 6.25 * p.heightCm - 5 * p.age;
+  const bmr = p.gender === "vrouw" ? base - 161 : p.gender === "man" ? base + 5 : base - 78;
+  const tdee = bmr * (ACTIVITY_FACTOR[p.activity] ?? 1.55);
+  const kcal = Math.round((p.goalType === "cut" ? tdee - 400 : p.goalType === "bulk" ? tdee + 300 : tdee) / 10) * 10;
+  const protein = Math.round(weightKg * (p.goalType === "cut" ? 2.2 : 2));
   const fat = Math.round((kcal * 0.27) / 9);
   const carbs = Math.max(50, Math.round((kcal - protein * 4 - fat * 9) / 4));
-  return { kcal, protein, carbs, fat };
+  const waterMl = Math.round((weightKg * 35) / 250) * 250;
+  const targetWeight = Math.round((p.goalType === "cut" ? weightKg - 5 : p.goalType === "bulk" ? weightKg + 4 : weightKg) * 2) / 2;
+  return { kcal, protein, carbs, fat, waterMl, targetWeight };
 }
