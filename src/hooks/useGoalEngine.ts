@@ -2,7 +2,9 @@ import * as React from "react";
 import { useStore, type AppState } from "@/store/useStore";
 import { challengeStatus, currentStreak, dailyGoals, dayNutrition, longestStreak, totalXp } from "@/lib/stats";
 import { ACHIEVEMENTS, levelFromXp } from "@/lib/gamification";
-import { lastNDays, todayKey } from "@/lib/date";
+import { lastNDays, todayKey, weekStartKey, shiftKey } from "@/lib/date";
+import { hasPerk, unlocksForLevel } from "@/lib/unlocks";
+import { levelTitle } from "@/lib/gamification";
 import { workoutVolume } from "@/lib/calc";
 
 /** Voortgang (0..1) per badge, voor de ring rond vergrendelde badges */
@@ -45,10 +47,26 @@ export function achievementProgress(s: AppState): Record<string, number> {
 export function useGoalEngine() {
   React.useEffect(() => {
     let timer: ReturnType<typeof setTimeout> | null = null;
+    let prevLevel: number | null = null;
     const run = () => {
       const s = useStore.getState();
       if (!s.onboarded) return;
       const today = todayKey();
+
+      // Nieuw level: vieren en de ontgrendelde beloning tonen.
+      const level = levelFromXp(totalXp(s));
+      if (prevLevel !== null && level > prevLevel) {
+        const got = unlocksForLevel(level);
+        s.celebrate({ title: `Level ${level}: ${levelTitle(level)}!`, subtitle: got.length ? `Ontgrendeld: ${got.map((u) => `${u.icon} ${u.name}`).join(", ")}` : "Blijf gaan, de volgende beloning komt eraan." });
+      }
+      prevLevel = level;
+
+      // Weekbonus (voordeel vanaf level 12): 5 perfecte dagen in de huidige week.
+      if (hasPerk(totalXp(s), "perk-week-bonus")) {
+        const monday = weekStartKey(today);
+        const perfect = Array.from({ length: 7 }, (_, i) => shiftKey(monday, i)).filter((d) => s.perfectDays[d]).length;
+        if (perfect >= 5 && !s.weekBonuses[monday]) s.markWeekBonus(monday, 250);
+      }
 
       // perfecte dag
       if (!s.perfectDays[today] && dailyGoals(s, today).every((g) => g.done)) {

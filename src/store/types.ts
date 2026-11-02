@@ -135,6 +135,14 @@ export interface Profile {
   programId?: string;
 }
 
+/** Gekozen beloningen (zie lib/unlocks.ts) */
+export interface Cosmetics {
+  frame?: string;
+  accent?: string;
+  title?: string;
+  confetti?: string;
+}
+
 export interface Settings {
   /** rusttimer automatisch starten na een afgevinkte set */
   restEnabled: boolean;

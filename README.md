@@ -87,6 +87,9 @@ In de voedingskiezer: tik op het barcode-icoon en dan op **Camera openen** (iOS 
 ## Instellingen (profiel-icoon)
 Profiel en doelen, herberekenen van macro's, rusttimer (aan/uit, standaardrust, overal dezelfde rust), trillen, alles wissen.
 
+## Beloningen per level
+Onder de levelkaart op Vandaag staat **Beloningen**: elk level ontgrendelt iets (`src/lib/unlocks.ts`). Cosmetisch en zichtbaar voor anderen in het klassement: avatar-ringen (brons 2, zilver 6, goud 10, diamant 15, legende 20), accentkleuren (goud 3, roze 7, groen 11, vuur 17), titels (4, 9, 14, 20, 30) en confetti (13, 25). Voordelen: streak-schild op level 5 (een gemiste dag per week breekt de streak niet), dubbele XP in het weekend op level 8, weekbonus van 250 XP bij 5 perfecte dagen op level 12. Bij een nieuw level verschijnt een viering met wat je ontgrendeld hebt; op de levelkaart staat altijd de volgende beloning.
+
 ## Gamification
 - **Dagdoelen**: calorieën binnen 10 %, eiwit, water, gewogen, training (of rustdag). Alles gehaald = perfecte dag (+100 XP + streakbonus).
 - **Streak**: aantal perfecte dagen op rij.

@@ -84,3 +84,11 @@
 - [x] "Deze week" toont maandag t.e.m. zondag; dag zonder registratie = 0 % (rustdag telt niet vanzelf); toekomstige dagen gedimd
 - [x] Klassement ververst bij openen van de app en elke minuut (scores van andere gsm's)
 - [x] Live gezet
+
+## Beloningen ontgrendelen per level (2026-11-02)
+- [x] unlocks.ts: beloningen per level (avatar-ringen, accentkleuren, titels, confetti-stijl, voordelen: streak-schild, dubbele XP in het weekend, weekbonus)
+- [x] Store: gekozen ring/kleur/titel bewaren; voordelen toepassen in awardXp en currentStreak
+- [x] Beloningenscherm (leveltrack) vanuit de levelkaart op Vandaag; "volgende beloning" op de kaart
+- [x] Ring en titel zichtbaar in kop, vergrendelscherm en klassement; meegestuurd naar Supabase (kolommen frame, title)
+- [x] Viering (confetti + toast) bij nieuw level met de ontgrendelde beloning
+- [x] Getest in browser (level-up-viering, ring actief, gouden accent, dubbele weekend-XP), gepusht en live

@@ -61,14 +61,14 @@ function ParticleDot({ particle }: { particle: Particle }) {
   return <div ref={ref} style={{ position: "absolute", width, height, borderRadius: radius, backgroundColor: color, willChange: "transform, opacity", pointerEvents: "none" }} />;
 }
 
-type FireOptions = { x?: number; y?: number; particleCount?: number; spread?: number; startVelocity?: number };
+type FireOptions = { x?: number; y?: number; particleCount?: number; spread?: number; startVelocity?: number; colors?: string[] };
 const ConfettiContext = React.createContext<(opts?: FireOptions) => void>(() => {});
 
 export function ConfettiProvider({ children }: { children: React.ReactNode }) {
   const [bursts, setBursts] = React.useState<Burst[]>([]);
   const nextId = React.useRef(0);
 
-  const fire = React.useCallback(({ x, y, particleCount = 90, spread = 110, startVelocity = 28 }: FireOptions = {}) => {
+  const fire = React.useCallback(({ x, y, particleCount = 90, spread = 110, startVelocity = 28, colors: palette = colors }: FireOptions = {}) => {
     const id = nextId.current++;
     const duration = 2.6;
     const ticks = Math.round(duration * 60);
@@ -80,7 +80,7 @@ export function ConfettiProvider({ children }: { children: React.ReactNode }) {
         keyframes: buildKeyframes({ angle, startVelocity: velocity, decay: 0.91, gravity: 1, drift: 0, wobbleSpeed: Math.min(0.11, Math.random() * 0.1 + 0.05), wobbleOffset: Math.random() * 10, size: 1, ticks, tiltRotations: 2 + Math.random() * 4, rotation: Math.random() * 360 }),
         duration,
         size: 6 + Math.random() * 6,
-        color: colors[Math.floor(Math.random() * colors.length)],
+        color: palette[Math.floor(Math.random() * palette.length)],
         shape: shapes[Math.floor(Math.random() * shapes.length)],
       };
     });

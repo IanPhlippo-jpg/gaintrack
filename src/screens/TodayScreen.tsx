@@ -1,5 +1,6 @@
 import { motion } from "motion/react";
-import { Check, ChevronRight, Droplets, Flame, Play, Scale, Target, Trophy, Utensils, Zap } from "lucide-react";
+import * as React from "react";
+import { Check, ChevronRight, Droplets, Flame, Gift, Play, Scale, Target, Trophy, Utensils, Zap } from "lucide-react";
 import { PageHeader, Section } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -7,6 +8,9 @@ import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-p
 import { CountUp } from "@/components/ui/count-up";
 import { WeeklyBars } from "@/components/ui/weekly-bars";
 import { LeaderboardCard } from "@/screens/Leaderboard";
+import { RewardsDrawer } from "@/screens/RewardsDrawer";
+import { nextUnlock } from "@/lib/unlocks";
+import { xpForLevel } from "@/lib/gamification";
 import { useStore } from "@/store/useStore";
 import { useNav } from "@/App";
 import { challengeStatus, currentStreak, dailyGoals, routinesForDay, totalXp, xpOnDay } from "@/lib/stats";
@@ -24,6 +28,8 @@ export function TodayScreen() {
   const streak = currentStreak(state);
   const xp = totalXp(state);
   const lp = levelProgress(xp);
+  const nextReward = nextUnlock(lp.level);
+  const [rewards, setRewards] = React.useState(false);
   const todayXp = xpOnDay(state, today);
   const challenge = challengeStatus(state, today);
   const planned = routinesForDay(state, today);
@@ -63,6 +69,11 @@ export function TodayScreen() {
               <p className="text-xs text-muted-foreground">
                 Nog {(lp.next - xp).toLocaleString("nl-BE")} XP tot level {lp.level + 1}
               </p>
+              {nextReward && (
+                <p className="mt-1 text-xs text-muted-foreground">
+                  Volgende beloning: <span className="font-semibold text-foreground">{nextReward.icon} {nextReward.name}</span> op level {nextReward.level}
+                </p>
+              )}
               <div className="mt-2 flex items-center gap-2">
                 <span className="inline-flex items-center gap-1 whitespace-nowrap rounded-full bg-primary/15 px-2 py-0.5 text-xs font-bold text-primary">
                   <Zap className="size-3" /> +{todayXp} vandaag
@@ -73,8 +84,13 @@ export function TodayScreen() {
               </div>
             </div>
           </div>
+          <button type="button" onClick={() => setRewards(true)} className="mt-3 flex w-full items-center justify-between rounded-xl bg-primary/10 px-3 py-2 text-left text-sm">
+            <span className="flex items-center gap-2 font-semibold"><Gift className="size-4 text-primary" /> Beloningen</span>
+            <span className="text-xs text-muted-foreground">{nextReward ? `nog ${Math.max(0, xpForLevel(nextReward.level) - xp).toLocaleString("nl-BE")} XP tot de volgende` : "alles ontgrendeld"}</span>
+          </button>
         </Card>
       </Section>
+      <RewardsDrawer open={rewards} onClose={() => setRewards(false)} />
 
       {/* Dagdoelen */}
       <Section

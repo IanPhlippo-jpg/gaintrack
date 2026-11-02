@@ -17,6 +17,9 @@ export type Account = {
   color: string;
   /** Profielfoto als data-URL (klein, ca. 256 px). */
   photo?: string;
+  /** Gekozen avatar-ring en titel (beloningen), ook zichtbaar voor anderen. */
+  frame?: string;
+  title?: string;
 };
 
 export type Registry = {
@@ -160,7 +163,7 @@ export async function setActive(r: Registry, id: string | null): Promise<Registr
   return registry;
 }
 
-export async function updateAccount(r: Registry, accountId: string, patch: Partial<Pick<Account, "name" | "photo" | "color">>): Promise<Registry> {
+export async function updateAccount(r: Registry, accountId: string, patch: Partial<Pick<Account, "name" | "photo" | "color" | "frame" | "title">>): Promise<Registry> {
   const registry = { ...r, accounts: r.accounts.map((a) => (a.id === accountId ? { ...a, ...patch } : a)) };
   await saveRegistry(registry);
   return registry;

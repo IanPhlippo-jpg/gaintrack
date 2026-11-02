@@ -1,11 +1,14 @@
 import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { accountStorage } from "@/store/storage";
+import { hasPerk } from "@/lib/unlocks";
+import { totalXp } from "@/lib/stats";
 import type {
   Challenge, Exercise, Food, FoodEntry, Goals, MealType, Profile, Routine, SetLog, Settings, WeightEntry, Workout, XpEvent,
+  Cosmetics,
 } from "./types";
 import { SEED_ROUTINES } from "@/data/exercises";
-import { todayKey } from "@/lib/date";
+import { todayKey, weekdayOf } from "@/lib/date";
 import { uid, round } from "@/lib/utils";
 import { bestSet, e1rm } from "@/lib/calc";
 import { XP } from "@/lib/gamification";
@@ -30,6 +33,9 @@ export interface AppState {
   challengesDone: Record<string, Challenge>;
   /** laatst getoonde feestmoment (voor toasts) */
   lastCelebration: { id: string; title: string; subtitle?: string; xp?: number; at: number } | null;
+  cosmetics: Cosmetics;
+  /** Weekbonus (perk) al uitgekeerd per weekstart */
+  weekBonuses: Record<string, true>;
 
   // profiel en doelen
   completeOnboarding: (profile: Profile, goals: Goals, weightKg: number, routines?: Routine[]) => void;
@@ -74,6 +80,8 @@ export interface AppState {
   markPerfectDay: (day: string, streak: number) => void;
   markChallengeDone: (challenge: Challenge) => void;
   celebrate: (c: { title: string; subtitle?: string; xp?: number }) => void;
+  setCosmetics: (patch: Partial<Cosmetics>) => void;
+  markWeekBonus: (weekStart: string, xp: number) => void;
   clearCelebration: () => void;
   resetAll: () => void;
 }
@@ -105,6 +113,8 @@ export const useStore = create<AppState>()(
       perfectDays: {},
       challengesDone: {},
       lastCelebration: null,
+      cosmetics: {},
+      weekBonuses: {},
 
       setSettings: (p) => set((s) => ({ settings: { ...s.settings, ...p } })),
       completeOnboarding: (profile, goals, weightKg, routines) => {
@@ -300,7 +310,12 @@ export const useStore = create<AppState>()(
       removeWeight: (day) => set((s) => ({ weights: s.weights.filter((w) => w.day !== day) })),
 
       awardXp: (amount, reason, day = todayKey()) =>
-        set((s) => ({ xpEvents: [...s.xpEvents, { id: uid(), day, amount, reason, at: Date.now() }] })),
+        set((s) => {
+          // Voordeel "Dubbele XP in het weekend" (level 8+): zaterdag en zondag tellen dubbel.
+          const weekend = weekdayOf(day) === 0 || weekdayOf(day) === 6;
+          const doubled = weekend && amount > 0 && hasPerk(totalXp(s), "perk-weekend-xp");
+          return { xpEvents: [...s.xpEvents, { id: uid(), day, amount: doubled ? amount * 2 : amount, reason: doubled ? `${reason} (x2 weekend)` : reason, at: Date.now() }] };
+        }),
       unlockAchievement: (id, title) => {
         if (get().achievements[id]) return;
         set((s) => ({
@@ -322,12 +337,19 @@ export const useStore = create<AppState>()(
         get().celebrate({ title: "Uitdaging gehaald!", subtitle: challenge.title, xp: challenge.xp });
       },
       celebrate: (c) => set({ lastCelebration: { id: uid(), at: Date.now(), ...c } }),
+      setCosmetics: (patch) => set((s) => ({ cosmetics: { ...s.cosmetics, ...patch } })),
+      markWeekBonus: (weekStart, xp) => {
+        if (get().weekBonuses[weekStart]) return;
+        set((s) => ({ weekBonuses: { ...s.weekBonuses, [weekStart]: true } }));
+        get().awardXp(xp, "Weekbonus: 5 perfecte dagen in een week");
+        set({ lastCelebration: { id: uid(), title: "Weekbonus!", subtitle: `+${xp} XP voor 5 perfecte dagen deze week`, xp, at: Date.now() } });
+      },
       clearCelebration: () => set({ lastCelebration: null }),
       resetAll: () =>
         set({
           onboarded: false, profile: DEFAULT_PROFILE, goals: DEFAULT_GOALS, settings: DEFAULT_SETTINGS, customFoods: [], favoriteFoodIds: [], foodLog: [], water: {},
           customExercises: [], routines: SEED_ROUTINES, workouts: [], activeWorkout: null, weights: [], xpEvents: [], achievements: {},
-          perfectDays: {}, challengesDone: {}, lastCelebration: null,
+          perfectDays: {}, challengesDone: {}, lastCelebration: null, cosmetics: {}, weekBonuses: {},
         }),
     }),
     {
@@ -338,7 +360,7 @@ export const useStore = create<AppState>()(
       partialize: (s) => ({ ...s, lastCelebration: null }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<AppState>;
-        return { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) }, profile: { ...DEFAULT_PROFILE, ...(p.profile ?? {}) } };
+        return { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) }, profile: { ...DEFAULT_PROFILE, ...(p.profile ?? {}) }, cosmetics: p.cosmetics ?? {}, weekBonuses: p.weekBonuses ?? {} };
       },
     },
   ),

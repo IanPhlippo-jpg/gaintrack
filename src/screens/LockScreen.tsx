@@ -67,15 +67,32 @@ export function PinPad({ onDigit, onBackspace, disabled }: { onDigit: (d: string
 
 const AVATAR_SIZE = { sm: "size-9 text-sm", md: "size-12 text-lg", lg: "size-16 text-2xl", xl: "size-24 text-4xl" } as const;
 
-export function Avatar({ account, size = "md", className }: { account: Pick<Account, "name" | "color" | "photo">; size?: keyof typeof AVATAR_SIZE; className?: string }) {
-  if (account.photo) {
-    return <img src={account.photo} alt={account.name} className={cn("shrink-0 rounded-full object-cover", AVATAR_SIZE[size], className)} />;
-  }
-  return (
-    <span className={cn("grid shrink-0 place-items-center rounded-full font-bold text-white", AVATAR_SIZE[size], className)} style={{ background: account.color }}>
+/** Ring rond de avatar, ontgrendeld per level (zie lib/unlocks.ts). */
+const FRAME_CLASS: Record<string, string> = {
+  bronze: "ring-2 ring-[#C98A5A]",
+  silver: "ring-2 ring-[#D8D4E6]",
+  gold: "ring-2 ring-[#E8C462] shadow-[0_0_14px_rgba(232,196,98,0.7)]",
+  diamond: "ring-2 ring-[#8FD3FF] shadow-[0_0_16px_rgba(143,211,255,0.8)]",
+  legend: "ring-2 ring-transparent shadow-[0_0_18px_rgba(232,196,98,0.8)]",
+};
+
+export function Avatar({ account, size = "md", className }: { account: Pick<Account, "name" | "color" | "photo"> & { frame?: string }; size?: keyof typeof AVATAR_SIZE; className?: string }) {
+  const frame = account.frame ? FRAME_CLASS[account.frame] ?? "" : "";
+  const inner = account.photo ? (
+    <img src={account.photo} alt={account.name} className={cn("shrink-0 rounded-full object-cover", AVATAR_SIZE[size], frame, className)} />
+  ) : (
+    <span className={cn("grid shrink-0 place-items-center rounded-full font-bold text-white", AVATAR_SIZE[size], frame, className)} style={{ background: account.color }}>
       {account.name.trim().charAt(0).toUpperCase() || "?"}
     </span>
   );
+  if (account.frame === "legend") {
+    return (
+      <span className="relative inline-grid shrink-0 place-items-center rounded-full p-[3px]" style={{ background: "conic-gradient(from 0deg, #E8C462, #F28AB2, #8FD3FF, #7FD6A4, #E8C462)" }}>
+        {inner}
+      </span>
+    );
+  }
+  return inner;
 }
 
 function Header({ title, help }: { title: string; help?: string }) {
@@ -354,7 +371,10 @@ export function AccountGate({ children }: { children: React.ReactNode }) {
     () => ({
       registry: registry ?? EMPTY_REGISTRY,
       account,
-      update: (r) => setRegistry(r),
+      update: (r) => {
+        setRegistry(r);
+        setAccount((a) => (a ? r.accounts.find((x) => x.id === a.id) ?? a : a));
+      },
       logout: async () => {
         if (!registry) return;
         await setActive(registry, null);

@@ -15,6 +15,9 @@ import { Onboarding } from "@/screens/Onboarding";
 import { ProfileDrawer } from "@/screens/ProfileDrawer";
 import { AccountGate } from "@/screens/LockScreen";
 import { useScoreSync } from "@/screens/Leaderboard";
+import { ACCENTS, cosmeticAllowed } from "@/lib/unlocks";
+import { levelFromXp } from "@/lib/gamification";
+import { totalXp } from "@/lib/stats";
 
 export type Tab = "vandaag" | "voeding" | "training" | "gewicht" | "stats";
 
@@ -36,6 +39,21 @@ function Shell() {
   const [profileOpen, setProfileOpen] = React.useState(false);
   useGoalEngine();
   useScoreSync();
+  // Ontgrendelde accentkleur toepassen op de hele app.
+  const accent = useStore((s) => s.cosmetics.accent);
+  const level = useStore((s) => levelFromXp(totalXp(s)));
+  React.useEffect(() => {
+    const el = document.documentElement;
+    const a = accent && cosmeticAllowed("accent", accent, level) ? ACCENTS[accent] : null;
+    for (const v of ["--primary", "--ring", "--chart-1", "--brand", "--primary-foreground"]) el.style.removeProperty(v);
+    if (a) {
+      el.style.setProperty("--primary", a.primary);
+      el.style.setProperty("--ring", a.primary);
+      el.style.setProperty("--chart-1", a.primary);
+      el.style.setProperty("--brand", a.primary);
+      el.style.setProperty("--primary-foreground", a.foreground);
+    }
+  }, [accent, level]);
 
   const nav = React.useMemo(() => ({ go: setTab, openProfile: () => setProfileOpen(true) }), []);
 

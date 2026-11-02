@@ -9,7 +9,7 @@ import { shiftKey, weekStartKey } from "@/lib/date";
 import { fetchWeek, pushWeekScore, syncEnabled } from "@/lib/sync";
 
 export interface WeekScore {
-  account: Pick<Account, "id" | "name" | "color" | "photo">;
+  account: Pick<Account, "id" | "name" | "color" | "photo" | "frame" | "title">;
   xp: number;
   workouts: number;
   perfectDays: number;
@@ -49,7 +49,7 @@ export async function weekLeaderboard(registry: Registry, me: { id: string; stat
     .map((p, i) => {
       const s = remote.scores.find((x) => x.account_id === p.id);
       return {
-        account: { id: p.id, name: p.name, color: colors[i % colors.length], photo: p.photo ?? undefined },
+        account: { id: p.id, name: p.name, color: colors[i % colors.length], photo: p.photo ?? undefined, frame: p.frame ?? undefined, title: p.title ?? undefined },
         isMe: false,
         remote: true,
         xp: s?.xp ?? 0,
@@ -62,11 +62,11 @@ export async function weekLeaderboard(registry: Registry, me: { id: string; stat
 }
 
 /** Eigen weekscore (en naam/foto) naar de server sturen. */
-export async function pushMyWeek(account: Pick<Account, "id" | "name" | "photo">, state: ScoreSource, weekStart: string): Promise<boolean> {
+export async function pushMyWeek(account: Pick<Account, "id" | "name" | "photo" | "frame" | "title">, state: ScoreSource, weekStart: string): Promise<boolean> {
   if (!syncEnabled()) return false;
   const s = scoreForWeek(state, weekStart);
   return pushWeekScore(
-    { id: account.id, name: account.name, photo: account.photo ?? null },
+    { id: account.id, name: account.name, photo: account.photo ?? null, frame: account.frame ?? null, title: account.title ?? null },
     { account_id: account.id, week: weekStart, xp: s.xp, workouts: s.workouts, sets: s.sets, perfect_days: s.perfectDays },
   );
 }

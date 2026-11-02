@@ -36,3 +36,7 @@ create policy "scores schrijven" on public.scores for all to anon using (true) w
 -- Foto's blijven klein (data-URL van 256 px): begrens de kolom zodat niemand de tabel volpompt.
 alter table public.players drop constraint if exists players_photo_size;
 alter table public.players add constraint players_photo_size check (photo is null or length(photo) < 120000);
+
+-- Beloningen (2 nov 2026): gekozen avatar-ring en titel, zichtbaar in het klassement.
+alter table public.players add column if not exists frame text;
+alter table public.players add column if not exists title text;

@@ -73,6 +73,7 @@ function Row({ row, rank, compact }: { row: WeekScore; rank: number; compact?: b
           {row.account.name} {row.isMe && <span className="text-xs font-normal text-muted-foreground">(jij)</span>}
           {row.remote && <span className="ml-1 rounded-full bg-muted px-1.5 text-[10px] font-semibold text-muted-foreground">andere gsm</span>}
         </p>
+        {row.account.title && <p className="text-[11px] font-semibold text-primary">{row.account.title}</p>}
         {!compact && (
           <p className="text-xs text-muted-foreground">
             {row.workouts} {row.workouts === 1 ? "training" : "trainingen"} · {row.sets} sets · {row.perfectDays} {row.perfectDays === 1 ? "perfecte dag" : "perfecte dagen"}

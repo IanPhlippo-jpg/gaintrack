@@ -22,6 +22,8 @@ export interface RemotePlayer {
   id: string;
   name: string;
   photo: string | null;
+  frame?: string | null;
+  title?: string | null;
   updated_at?: string;
 }
 
@@ -62,7 +64,7 @@ export async function fetchWeek(week: string): Promise<{ players: RemotePlayer[]
   if (!syncEnabled()) return null;
   try {
     const [p, s] = await Promise.all([
-      fetch(`${URL_}/rest/v1/players?select=id,name,photo`, { headers: headers() }),
+      fetch(`${URL_}/rest/v1/players?select=id,name,photo,frame,title`, { headers: headers() }),
       fetch(`${URL_}/rest/v1/scores?week=eq.${week}&select=account_id,week,xp,workouts,sets,perfect_days`, { headers: headers() }),
     ]);
     if (!p.ok || !s.ok) return null;

@@ -1,8 +1,9 @@
+import { hasPerk } from "@/lib/unlocks";
 import type { AppState } from "@/store/useStore";
 import type { Challenge, Exercise, SetLog, Workout } from "@/store/types";
 import { SEED_EXERCISES } from "@/data/exercises";
 import { SEED_FOODS } from "@/data/foods";
-import { lastNDays, shiftKey, todayKey, weekdayOf } from "./date";
+import { lastNDays, shiftKey, todayKey, weekdayOf, daysBetween } from "./date";
 import { bestSet, e1rm, workoutSets, workoutVolume } from "./calc";
 import { challengeForDay } from "./gamification";
 
@@ -73,10 +74,22 @@ export const isPerfectDay = (s: AppState, day: string) => dailyGoals(s, day).eve
 export function currentStreak(s: AppState): number {
   const today = todayKey();
   let day = s.perfectDays[today] || isPerfectDay(s, today) ? today : shiftKey(today, -1);
+  // Voordeel "Streak-schild" (level 5+): een gemiste dag per 7 dagen telt niet als onderbreking.
+  const shield = hasPerk(totalXp(s), "perk-streak-shield");
   let streak = 0;
-  while (s.perfectDays[day]) {
-    streak++;
-    day = shiftKey(day, -1);
+  let lastShield: string | null = null;
+  for (;;) {
+    if (s.perfectDays[day]) {
+      streak++;
+      day = shiftKey(day, -1);
+      continue;
+    }
+    if (shield && streak > 0 && day !== today && (!lastShield || daysBetween(day, lastShield) >= 7) && s.perfectDays[shiftKey(day, -1)]) {
+      lastShield = day;
+      day = shiftKey(day, -1);
+      continue;
+    }
+    break;
   }
   return streak;
 }
