@@ -26,7 +26,7 @@ function useElapsed(start: number) {
   return `${Math.floor(s / 60)}:${String(s % 60).padStart(2, "0")}`;
 }
 
-export function ActiveWorkout() {
+export function ActiveWorkout({ onFinished }: { onFinished: (w: Workout) => void }) {
   const state = useStore();
   const w = state.activeWorkout!;
   const routine = state.routines.find((r) => r.id === w.routineId);
@@ -35,7 +35,6 @@ export function ActiveWorkout() {
   const fire = useConfetti();
   const [picker, setPicker] = React.useState(false);
   const [confirmCancel, setConfirmCancel] = React.useState(false);
-  const [summary, setSummary] = React.useState<Workout | null>(null);
   const [collapsed, setCollapsed] = React.useState<Record<number, boolean>>({});
   const prs = React.useMemo(() => personalRecords(state), [state.workouts]); // eslint-disable-line react-hooks/exhaustive-deps
 
@@ -47,14 +46,20 @@ export function ActiveWorkout() {
     const done = !set.done;
     state.updateSet(exIndex, setIndex, { done });
     if (done) {
-      const rest = routine?.exercises.find((r) => r.exerciseId === w.exercises[exIndex].exerciseId)?.restSec ?? 90;
-      timer.start(rest);
+      const { settings } = state;
+      if (settings.restEnabled) {
+        const routineRest = routine?.exercises.find((r) => r.exerciseId === w.exercises[exIndex].exerciseId)?.restSec;
+        const rest = settings.restForAll || !routineRest ? settings.restSec : routineRest;
+        if (rest > 0) timer.start(rest);
+      }
       const pr = prs[w.exercises[exIndex].exerciseId];
       if (set.reps > 0 && pr && e1rm(set.weight, set.reps) > pr.e1rm + 0.01) fire({ particleCount: 50, y: window.innerHeight * 0.5 });
-      try {
-        navigator.vibrate?.(30);
-      } catch {
-        /* geen trilfunctie */
+      if (settings.haptics) {
+        try {
+          navigator.vibrate?.(30);
+        } catch {
+          /* geen trilfunctie */
+        }
       }
     }
   };
@@ -62,8 +67,8 @@ export function ActiveWorkout() {
   const finish = () => {
     const done = state.finishWorkout();
     if (done) {
-      setSummary(done);
       fire({ particleCount: 140, spread: 130 });
+      onFinished(done);
     }
   };
 
@@ -80,6 +85,15 @@ export function ActiveWorkout() {
             {elapsed} · {sets} sets · {volume.toLocaleString("nl-BE")} kg
           </p>
         </div>
+        <button
+          type="button"
+          onClick={() => state.setSettings({ restEnabled: !state.settings.restEnabled })}
+          aria-label={state.settings.restEnabled ? "Rusttimer uitzetten" : "Rusttimer aanzetten"}
+          title={state.settings.restEnabled ? `Rusttimer aan (${state.settings.restSec}s)` : "Rusttimer uit"}
+          className={cn("grid size-10 place-items-center rounded-full", state.settings.restEnabled ? "bg-orange-500/20 text-orange-400" : "bg-muted text-muted-foreground")}
+        >
+          <Timer className="size-5" />
+        </button>
         <Button size="sm" onClick={finish} disabled={sets === 0}>
           <Flag className="size-4" /> Klaar
         </Button>
@@ -207,8 +221,6 @@ export function ActiveWorkout() {
           </Button>
         </div>
       </Drawer>
-
-      <WorkoutSummary workout={summary} onClose={() => setSummary(null)} />
     </div>
   );
 }

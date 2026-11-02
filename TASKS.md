@@ -16,5 +16,6 @@
 - [x] Onboarding als quiz (1 vraag per scherm) → dagdoelen via Mifflin-St Jeor + programma op maat
 - [x] Trainingsprogramma's voor vrouwen, mannen en iedereen (13 programma's) + wisselen in Training
 - [x] Navigatiebalk met schuivende actieve pil
-- [~] Testen in browser op iPhone-formaat + screenshots
-- [ ] iOS-build klaarzetten (Capacitor) en uitleg in README
+- [x] Rusttimer en trillen instelbaar onder profiel-icoon (aan/uit, standaardrust, overal dezelfde rust)
+- [x] Testen in browser op iPhone-formaat + screenshots (docs/screenshots)
+- [x] iOS-project gegenereerd (ios/, camera-rechten in Info.plist) + uitleg in README; echte build vereist Mac of cloudbuild

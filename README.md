@@ -32,6 +32,18 @@ In Xcode: kies je team onder *Signing & Capabilities*, sluit je iPhone aan en dr
 - `src/lib/` – berekeningen (e1RM, volume, trends), gamification (XP, levels, badges, uitdagingen), statistieken
 - `src/data/` – basisvoeding (NL), basisoefeningen (NL) en de fotodatabase (876 oefeningen, free-exercise-db)
 
+## Onboarding als quiz
+Eén vraag per scherm (naam, geslacht, leeftijd, lengte, gewicht, doel, activiteit, trainingsdagen, ervaring). Daaruit worden de dagdoelen berekend (Mifflin-St Jeor × activiteitsfactor, eiwit 2 g/kg, vet 27 %, water 35 ml/kg) en wordt een trainingsprogramma op maat voorgesteld. Het startgewicht wordt niet automatisch als meting geteld: de eerste weging bevestig je zelf op het gewichtsscherm.
+
+## Trainingsprogramma's
+13 programma's in `src/data/programs.ts`, opgesplitst in **vrouwen** (starter, full body, glutes & legs, upper/lower, shape & strength), **mannen** (starter, full body, 5×5, upper/lower, bodybuilding split, push/pull/legs) en **iedereen** (thuis zonder toestellen, full body basis). Wisselen via Training → Programma's; elk schema blijft daarna aanpasbaar.
+
+## Barcodes scannen
+In de voedingskiezer: tik op het barcode-icoon, richt de camera op de streepjescode. De app gebruikt de ingebouwde BarcodeDetector of ZXing en zoekt het product op bij Open Food Facts (waarden per 100 g). Gevonden producten worden bewaard als eigen voedingsmiddel, dus de volgende scan werkt ook offline. Niet gevonden? Dan vul je het zelf in, gekoppeld aan de barcode.
+
+## Instellingen (profiel-icoon)
+Profiel en doelen, herberekenen van macro's, rusttimer (aan/uit, standaardrust, overal dezelfde rust), trillen, alles wissen.
+
 ## Gamification
 - **Dagdoelen**: calorieën binnen 10 %, eiwit, water, gewogen, training (of rustdag). Alles gehaald = perfecte dag (+100 XP + streakbonus).
 - **Streak**: aantal perfecte dagen op rij.

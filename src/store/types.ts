@@ -119,6 +119,17 @@ export interface Profile {
   programId?: string;
 }
 
+export interface Settings {
+  /** rusttimer automatisch starten na een afgevinkte set */
+  restEnabled: boolean;
+  /** standaardrust in seconden */
+  restSec: number;
+  /** true = altijd de standaardrust gebruiken, false = de rust per oefening uit het schema */
+  restForAll: boolean;
+  /** trillen bij set, timer en feestmomenten */
+  haptics: boolean;
+}
+
 export interface XpEvent {
   id: string;
   day: string;

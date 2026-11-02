@@ -2,7 +2,7 @@ import { create } from "zustand";
 import { createJSONStorage, persist } from "zustand/middleware";
 import { appStorage } from "./storage";
 import type {
-  Challenge, Exercise, Food, FoodEntry, Goals, MealType, Profile, Routine, SetLog, WeightEntry, Workout, XpEvent,
+  Challenge, Exercise, Food, FoodEntry, Goals, MealType, Profile, Routine, SetLog, Settings, WeightEntry, Workout, XpEvent,
 } from "./types";
 import { SEED_ROUTINES } from "@/data/exercises";
 import { todayKey } from "@/lib/date";
@@ -14,6 +14,7 @@ export interface AppState {
   onboarded: boolean;
   profile: Profile;
   goals: Goals;
+  settings: Settings;
   customFoods: Food[];
   favoriteFoodIds: string[];
   foodLog: FoodEntry[];
@@ -36,6 +37,7 @@ export interface AppState {
   applyProgram: (programId: string, routines: Routine[], replace: boolean) => void;
   setProfile: (p: Partial<Profile>) => void;
   setGoals: (g: Partial<Goals>) => void;
+  setSettings: (s: Partial<Settings>) => void;
 
   // voeding
   addCustomFood: (food: Omit<Food, "id" | "custom">) => Food;
@@ -77,6 +79,7 @@ export interface AppState {
 
 const DEFAULT_PROFILE: Profile = { name: "", gender: "man", age: 30, heightCm: 180, startWeight: 80, goalType: "maintain", activity: "matig", experience: "beginner", daysPerWeek: 3 };
 const DEFAULT_GOALS: Goals = { kcal: 2500, protein: 160, carbs: 280, fat: 80, waterMl: 2500, targetWeight: 80, weeklyWorkouts: 4 };
+const DEFAULT_SETTINGS: Settings = { restEnabled: true, restSec: 90, restForAll: false, haptics: true };
 
 const emptySet = (weight = 0, reps = 0): SetLog => ({ id: uid(), weight, reps, done: false });
 
@@ -86,6 +89,7 @@ export const useStore = create<AppState>()(
       onboarded: false,
       profile: DEFAULT_PROFILE,
       goals: DEFAULT_GOALS,
+      settings: DEFAULT_SETTINGS,
       customFoods: [],
       favoriteFoodIds: [],
       foodLog: [],
@@ -101,6 +105,7 @@ export const useStore = create<AppState>()(
       challengesDone: {},
       lastCelebration: null,
 
+      setSettings: (p) => set((s) => ({ settings: { ...s.settings, ...p } })),
       completeOnboarding: (profile, goals, weightKg, routines) => {
         // Het startgewicht wordt bewust niet als meting van vandaag geregistreerd:
         // de gebruiker bevestigt zijn weging zelf op het gewichtsscherm.
@@ -318,7 +323,7 @@ export const useStore = create<AppState>()(
       clearCelebration: () => set({ lastCelebration: null }),
       resetAll: () =>
         set({
-          onboarded: false, profile: DEFAULT_PROFILE, goals: DEFAULT_GOALS, customFoods: [], favoriteFoodIds: [], foodLog: [], water: {},
+          onboarded: false, profile: DEFAULT_PROFILE, goals: DEFAULT_GOALS, settings: DEFAULT_SETTINGS, customFoods: [], favoriteFoodIds: [], foodLog: [], water: {},
           customExercises: [], routines: SEED_ROUTINES, workouts: [], activeWorkout: null, weights: [], xpEvents: [], achievements: {},
           perfectDays: {}, challengesDone: {}, lastCelebration: null,
         }),
@@ -327,6 +332,10 @@ export const useStore = create<AppState>()(
       name: "gaintrack-v1",
       storage: createJSONStorage(() => appStorage),
       partialize: (s) => ({ ...s, lastCelebration: null }),
+      merge: (persisted, current) => {
+        const p = (persisted ?? {}) as Partial<AppState>;
+        return { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) }, profile: { ...DEFAULT_PROFILE, ...(p.profile ?? {}) } };
+      },
     },
   ),
 );

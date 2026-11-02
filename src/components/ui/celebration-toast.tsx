@@ -15,10 +15,12 @@ export function CelebrationToast() {
     if (!celebration || celebration.id === lastId.current) return;
     lastId.current = celebration.id;
     fire({ y: window.innerHeight * 0.3 });
-    try {
-      navigator.vibrate?.(60);
-    } catch {
-      /* geen trilfunctie */
+    if (useStore.getState().settings.haptics) {
+      try {
+        navigator.vibrate?.(60);
+      } catch {
+        /* geen trilfunctie */
+      }
     }
     const t = setTimeout(clear, 4200);
     return () => clearTimeout(t);

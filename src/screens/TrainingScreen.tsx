@@ -9,7 +9,7 @@ import { Drawer } from "@/components/ui/drawer";
 import { NumberStepper } from "@/components/ui/number-stepper";
 import { ExerciseMedia } from "@/components/ui/exercise-media";
 import AnimatedTabs from "@/components/ui/animated-tabs";
-import { ActiveWorkout } from "./ActiveWorkout";
+import { ActiveWorkout, WorkoutSummary } from "./ActiveWorkout";
 import { CustomExerciseForm, ExercisePicker, useExerciseSearch, dbToExercise } from "./ExercisePicker";
 import { useStore } from "@/store/useStore";
 import type { Exercise, Routine, Workout } from "@/store/types";
@@ -25,17 +25,24 @@ type TrainTab = "schema" | "oefeningen" | "historiek";
 export function TrainingScreen() {
   const active = useStore((s) => s.activeWorkout);
   const [tab, setTab] = React.useState<TrainTab>("schema");
-  if (active) return <ActiveWorkout />;
+  const [summary, setSummary] = React.useState<Workout | null>(null);
   return (
-    <div>
-      <PageHeader title="Training" subtitle={fmtDay(todayKey())} />
-      <Section>
-        <AnimatedTabs<TrainTab> variant="segment" activeTab={tab} onChange={setTab} tabs={[{ id: "schema", label: "Schema" }, { id: "oefeningen", label: "Oefeningen" }, { id: "historiek", label: "Historiek" }]} />
-      </Section>
-      {tab === "schema" && <RoutinesTab />}
-      {tab === "oefeningen" && <ExercisesTab />}
-      {tab === "historiek" && <HistoryTab />}
-    </div>
+    <>
+      {active ? (
+        <ActiveWorkout onFinished={setSummary} />
+      ) : (
+        <div>
+          <PageHeader title="Training" subtitle={fmtDay(todayKey())} />
+          <Section>
+            <AnimatedTabs<TrainTab> variant="segment" activeTab={tab} onChange={setTab} tabs={[{ id: "schema", label: "Schema" }, { id: "oefeningen", label: "Oefeningen" }, { id: "historiek", label: "Historiek" }]} />
+          </Section>
+          {tab === "schema" && <RoutinesTab />}
+          {tab === "oefeningen" && <ExercisesTab />}
+          {tab === "historiek" && <HistoryTab />}
+        </div>
+      )}
+      <WorkoutSummary workout={summary} onClose={() => setSummary(null)} />
+    </>
   );
 }
 

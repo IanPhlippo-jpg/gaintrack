@@ -18,6 +18,20 @@ const ACTIVITIES: { v: Activity; l: string }[] = [
   { v: "zeer", l: "Zeer actief" },
 ];
 
+function Toggle({ label, desc, checked, onChange }: { label: string; desc?: string; checked: boolean; onChange: (v: boolean) => void }) {
+  return (
+    <button type="button" role="switch" aria-checked={checked} onClick={() => onChange(!checked)} className="flex w-full items-center gap-3 text-left">
+      <div className="min-w-0 flex-1">
+        <p className="text-sm font-semibold">{label}</p>
+        {desc && <p className="text-xs text-muted-foreground">{desc}</p>}
+      </div>
+      <span className={cn("relative h-7 w-12 shrink-0 rounded-full transition-colors", checked ? "bg-primary" : "bg-muted")}>
+        <span className={cn("absolute top-0.5 size-6 rounded-full bg-white shadow transition-transform", checked ? "translate-x-[22px]" : "translate-x-0.5")} />
+      </span>
+    </button>
+  );
+}
+
 function Segment<T extends string>({ options, value, onChange }: { options: { v: T; l: string }[]; value: T; onChange: (v: T) => void }) {
   return (
     <div className={cn("grid gap-2", options.length === 3 ? "grid-cols-3" : "grid-cols-2")}>
@@ -36,6 +50,8 @@ export function ProfileDrawer({ open, onOpenChange }: { open: boolean; onOpenCha
   const weights = useStore((s) => s.weights);
   const setProfile = useStore((s) => s.setProfile);
   const setGoals = useStore((s) => s.setGoals);
+  const settings = useStore((s) => s.settings);
+  const setSettings = useStore((s) => s.setSettings);
   const resetAll = useStore((s) => s.resetAll);
   const xp = useStore((s) => totalXp(s));
   const lp = levelProgress(xp);
@@ -126,6 +142,21 @@ export function ProfileDrawer({ open, onOpenChange }: { open: boolean; onOpenCha
             {field("fat", "Vet", "g", 5)}
             {field("waterMl", "Water", "l", 0.25)}
             {field("targetWeight", "Streefgewicht", "kg", 0.5)}
+          </div>
+        </div>
+
+        <div className="rounded-2xl border bg-card p-4">
+          <p className="mb-3 text-sm font-semibold">Rusttimer</p>
+          <Toggle label="Rusttimer na elke set" desc="Start automatisch zodra je een set afvinkt" checked={settings.restEnabled} onChange={(v) => setSettings({ restEnabled: v })} />
+          <div className={cn("mt-3 space-y-3", !settings.restEnabled && "pointer-events-none opacity-40")}>
+            <div>
+              <p className="mb-1 text-xs font-semibold text-muted-foreground">Standaardrust</p>
+              <NumberStepper value={settings.restSec} onChange={(v) => setSettings({ restSec: v })} step={15} min={15} max={600} unit="seconden" />
+            </div>
+            <Toggle label="Overal dezelfde rust" desc="Negeer de rust per oefening uit je schema" checked={settings.restForAll} onChange={(v) => setSettings({ restForAll: v })} />
+          </div>
+          <div className="mt-3 border-t pt-3">
+            <Toggle label="Trillen" desc="Bij afgevinkte sets, de timer en feestmomenten" checked={settings.haptics} onChange={(v) => setSettings({ haptics: v })} />
           </div>
         </div>
 
