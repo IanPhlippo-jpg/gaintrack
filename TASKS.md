@@ -71,3 +71,11 @@
 - [x] Dubbele id's gecontroleerd (0), build, pushen, live controleren
 - [x] Gerechten: eigen recept uit ingrediënten (grammen per ingrediënt, aantal porties), totalen en per-100 g berekend, bewaard als eigen voedingsmiddel met ingrediëntenlijst
 - [x] Barcodescanner robuuster op iPhone-PWA: camera start pas na tik (gebruikersgebaar), duidelijke foutmelding, fallback via foto nemen (ZXing op afbeelding), handmatig typen blijft
+
+## 2000+ producten en tragere levels (2026-11-02)
+- [x] NEVO (RIVM) bekeken: enkel via aanvraagformulier en onveranderd te gebruiken, dus niet gebruikt
+- [x] 1700 populairste producten BE/NL uit Open Food Facts v2 gehaald (24 pagina's, 6,5 s pauze, 503-retries)
+- [x] Omgezet en gefilterd: 1391 bruikbare merkproducten (foods-off.json, 231 KB) → totaal 2120 in de app
+- [x] Levelcurve: 600 × (level−1)^1,8 XP (level 10 bij 31.320 XP, level 20 bij 120.200 XP)
+- [~] Supabase: CLI-login kan niet zonder terminal (non-TTY); alternatief via terminalpaneel of persoonlijk toegangstoken
+- [ ] Live zetten en controleren

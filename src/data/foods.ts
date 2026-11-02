@@ -1,5 +1,6 @@
 import type { Food } from "@/store/types";
 import { EXTRA_FOODS } from "./foods-extra";
+import { OFF_FOODS } from "./foods-off";
 
 const f = (id: string, name: string, kcal: number, protein: number, carbs: number, fat: number, portion = 100, portionLabel?: string, aliases?: string[]): Food => ({
   id, name, kcal, protein, carbs, fat, portion, portionLabel, aliases,
@@ -362,5 +363,8 @@ const BASE_FOODS: Food[] = [
   f("eiwitpannenkoek", "Eiwitpannenkoeken", 180, 15, 20, 4, 150, "3 kleine"),
 ];
 
-/** Volledige bibliotheek: basis + uitbreiding (dubbele id's krijgen voorrang vanuit de basis). */
-export const SEED_FOODS: Food[] = [...BASE_FOODS, ...EXTRA_FOODS.filter((e) => !BASE_FOODS.some((b) => b.id === e.id))];
+/** Volledige bibliotheek: basis + uitbreiding + supermarktproducten (Open Food Facts). Basis heeft voorrang bij gelijke id. */
+const OWN_FOODS: Food[] = [...BASE_FOODS, ...EXTRA_FOODS.filter((e) => !BASE_FOODS.some((b) => b.id === e.id))];
+export const SEED_FOODS: Food[] = [...OWN_FOODS, ...OFF_FOODS];
+/** Aantal producten per bron, voor de uitleg in de app. */
+export const FOOD_COUNTS = { own: OWN_FOODS.length, off: OFF_FOODS.length, total: OWN_FOODS.length + OFF_FOODS.length };

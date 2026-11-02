@@ -13,9 +13,17 @@ export const XP = {
   streakBonusPerDay: 5,
 } as const;
 
-/** Level = 1 + floor(sqrt(xp / 150)) → level 2 bij 150 xp, level 5 bij 2400 xp, level 10 bij 12150 xp */
-export const levelFromXp = (xp: number) => 1 + Math.floor(Math.sqrt(Math.max(0, xp) / 150));
-export const xpForLevel = (level: number) => (level - 1) ** 2 * 150;
+/**
+ * XP nodig voor een level: 600 × (level − 1)^1,8 (afgerond op 10).
+ * Level 2 bij 600 XP, 3 bij 2.090, 5 bij 7.300, 10 bij 31.200, 15 bij 69.400, 20 bij 120.800.
+ * Een perfecte dag levert zo'n 300-400 XP: level 10 vraagt dus ruim twee maanden volhouden, level 20 bijna een jaar.
+ */
+export const xpForLevel = (level: number) => (level <= 1 ? 0 : Math.round((600 * (level - 1) ** 1.8) / 10) * 10);
+export const levelFromXp = (xp: number) => {
+  let level = 1;
+  while (xpForLevel(level + 1) <= Math.max(0, xp)) level++;
+  return level;
+};
 export const levelProgress = (xp: number) => {
   const level = levelFromXp(xp);
   const start = xpForLevel(level);
