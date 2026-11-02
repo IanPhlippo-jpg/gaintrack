@@ -26,3 +26,11 @@
 - [x] Repo aanmaken (github.com/IanPhlippo-jpg/gaintrack, publiek) en pushen; eerste cloudbuild geslaagd in 3m43s
 - [x] README: .ipa installeren vanaf Windows (Sideloadly, gratis Apple ID) en de TestFlight-route met Apple Developer-account
 - [x] Buildresultaat gecontroleerd; .ipa in release/GainTrack-unsigned.ipa en als artifact bij run 41424458377
+
+## Web-app online zetten als snelkoppeling op de gsm, zonder 7-dagenlimiet (2026-11-02)
+- [x] Basispad instelbaar maken (VITE_BASE) zodat dezelfde build op GitHub Pages, Vercel en in Capacitor werkt
+- [x] PWA-manifest en apple-touch-icon relatief maken, start_url/scope op het basispad
+- [x] GitHub Actions-workflow die de web-app bouwt en naar GitHub Pages publiceert
+- [~] GitHub Pages activeren voor de repo en pushen
+- [ ] Online versie testen op iPhone-formaat (onboarding, installatie-metadata, manifest, service worker)
+- [ ] README: link, "Zet op beginscherm"-stappen, Vercel-import als alternatief
