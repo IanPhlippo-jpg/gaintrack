@@ -43,4 +43,4 @@
 - [x] Vergrendelscherm: account kiezen, pincode (keypad, lockout), nieuw account met naam → toegangscode → pincode
 - [x] Profiel: account, pincode wijzigen, uitloggen; beheerder: codelijst met volgende vrije code, kopiëren, afvinken
 - [x] Getest in browser: foute/juiste code, beheersleutel, pincode fout/juist, herladen blijft aangemeld, tweede account gescheiden
-- [~] Pushen naar GitHub Pages en online controleren
+- [x] Pushen naar GitHub Pages en online controleren (run 41439496330)
