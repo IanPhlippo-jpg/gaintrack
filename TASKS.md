@@ -44,3 +44,7 @@
 - [x] Profiel: account, pincode wijzigen, uitloggen; beheerder: codelijst met volgende vrije code, kopiëren, afvinken
 - [x] Getest in browser: foute/juiste code, beheersleutel, pincode fout/juist, herladen blijft aangemeld, tweede account gescheiden
 - [x] Pushen naar GitHub Pages en online controleren (run 41439496330)
+
+## Bugfix: getal typen in NumberStepper sprong naar 300 kg (2026-11-02)
+- [x] Typbuffer in NumberStepper: pas afronden/begrenzen bij verlaten van het veld of Enter; selectie bij focus ook op iOS
+- [x] Testen in browser (gewicht in quiz, profiel) en pushen naar GitHub Pages

@@ -1,3 +1,4 @@
+import * as React from "react";
 import { Minus, Plus } from "lucide-react";
 import { cn } from "@/lib/utils";
 
@@ -13,7 +14,12 @@ interface NumberStepperProps {
   className?: string;
 }
 
-/** Getallen tonen met komma als decimaalteken (nl-BE) en nooit meer decimalen dan de stap */
+/**
+ * Getallen tonen met komma als decimaalteken (nl-BE) en nooit meer decimalen dan de stap.
+ * Tijdens het typen werkt het veld met een eigen buffer: de waarde wordt pas afgerond en
+ * begrensd (min/max) bij het verlaten van het veld of op Enter, zodat "8" + "2" niet eerst
+ * als 808 wordt gelezen en op het maximum blijft hangen.
+ */
 export function NumberStepper({ value, onChange, step = 1, min = 0, max = 9999, decimals, unit, size = "sm", className }: NumberStepperProps) {
   const stepDecimals = (String(step).split(".")[1] ?? "").length;
   const d = Math.max(stepDecimals, decimals ?? 0);
@@ -21,6 +27,25 @@ export function NumberStepper({ value, onChange, step = 1, min = 0, max = 9999, 
   const set = (v: number) => onChange(clampRound(Math.round(v / step) * step));
   const big = size === "lg";
   const shown = Number.isFinite(value) ? value.toLocaleString("nl-BE", { minimumFractionDigits: 0, maximumFractionDigits: d }) : "";
+
+  // null = niet aan het typen. Bij focus wordt het veld leeggemaakt (oude waarde als placeholder),
+  // zodat ook op iOS, waar select-all bij een tik niet betrouwbaar is, cijfers nooit achter de oude waarde komen.
+  const [draft, setDraft] = React.useState<string | null>(null);
+
+  const parse = (text: string) => {
+    const raw = text.replace(/\s/g, "").replace(/\./g, "").replace(",", ".");
+    if (raw === "" || raw === "-" || raw === ".") return null;
+    const v = parseFloat(raw);
+    return Number.isNaN(v) ? null : v;
+  };
+
+  const commit = () => {
+    if (draft !== null) {
+      const v = parse(draft);
+      if (v !== null) onChange(clampRound(v));
+    }
+    setDraft(null);
+  };
 
   return (
     <div className={cn("flex items-center gap-1", className)}>
@@ -32,16 +57,21 @@ export function NumberStepper({ value, onChange, step = 1, min = 0, max = 9999, 
           <input
             type="text"
             inputMode="decimal"
-            value={shown}
+            enterKeyHint="done"
+            value={draft ?? shown}
+            placeholder={shown}
             onChange={(e) => {
-              const raw = e.target.value.replace(/\./g, "").replace(",", ".");
-              if (raw === "" || raw === "-") return onChange(0);
-              const v = parseFloat(raw);
-              if (!Number.isNaN(v)) onChange(clampRound(v));
+              // Enkel cijfers, komma/punt en een minteken toelaten in de buffer.
+              const text = e.target.value.replace(/[^0-9.,-]/g, "");
+              setDraft(text);
             }}
-            onFocus={(e) => e.target.select()}
+            onFocus={() => setDraft("")}
+            onBlur={commit}
+            onKeyDown={(e) => {
+              if (e.key === "Enter") (e.target as HTMLInputElement).blur();
+            }}
             className={cn(
-              "w-full rounded-xl border border-input bg-background/60 text-center font-bold tabular-nums focus:outline-none focus:ring-2 focus:ring-ring",
+              "w-full rounded-xl border border-input bg-background/60 text-center font-bold tabular-nums placeholder:text-muted-foreground/50 focus:outline-none focus:ring-2 focus:ring-ring",
               big ? "h-14 text-3xl" : "h-10 text-base",
               big && unit && "pr-10",
             )}

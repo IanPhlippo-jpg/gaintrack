@@ -34,7 +34,7 @@ const STEPS: { id: StepId; question: string; help: string }[] = [
   { id: "gender", question: "Wat is je geslacht?", help: "Bepaalt je energiebehoefte en welke trainingsprogramma's we voorstellen." },
   { id: "age", question: "Hoe oud ben je?", help: "Je leeftijd telt mee in je ruststofwisseling." },
   { id: "height", question: "Hoe lang ben je?", help: "Nodig voor je BMI en calorieberekening." },
-  { id: "weight", question: "Wat weeg je nu?", help: "Dit wordt meteen je eerste meting in de gewichtsgrafiek." },
+  { id: "weight", question: "Wat weeg je nu?", help: "Je startgewicht voor je doelen. Je eerste echte meting bevestig je zelf op het gewichtsscherm." },
   { id: "goal", question: "Wat wil je bereiken?", help: "We stellen je calorieën en macro's hierop af." },
   { id: "activity", question: "Hoe actief ben je buiten het sporten?", help: "Werk, stappen en dagelijkse beweging." },
   { id: "days", question: "Hoeveel dagen per week wil je trainen?", help: "Hierop kiezen we een programma dat je volhoudt." },
