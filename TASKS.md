@@ -77,5 +77,5 @@
 - [x] 1700 populairste producten BE/NL uit Open Food Facts v2 gehaald (24 pagina's, 6,5 s pauze, 503-retries)
 - [x] Omgezet en gefilterd: 1391 bruikbare merkproducten (foods-off.json, 231 KB) → totaal 2120 in de app
 - [x] Levelcurve: 600 × (level−1)^1,8 XP (level 10 bij 31.320 XP, level 20 bij 120.200 XP)
-- [~] Supabase: CLI-login kan niet zonder terminal (non-TTY); alternatief via terminalpaneel of persoonlijk toegangstoken
-- [ ] Live zetten en controleren
+- [x] Supabase: via toegangstoken van Ian; bestaand project zdiycofagksxoetewpjb (eu-west-1) gebruikt, schema.sql uitgevoerd, REST getest, VITE_SUPABASE_URL/ANON_KEY als Actions-variabelen, Pages herbouwd
+- [x] Live gezet (04f2242 + herbouw met Supabase-variabelen)
