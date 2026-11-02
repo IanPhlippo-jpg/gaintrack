@@ -58,3 +58,8 @@
 - [x] Profielfoto per account (upload, verkleind naar 256 px) in profiel, kop, vergrendelscherm en klassement
 - [x] Weekklassement op Vandaag (top 3 + paneel per week); synchronisatie via Supabase voorbereid (src/lib/sync.ts, supabase/schema.sql, variabelen in pages.yml)
 - [x] Voedingsbibliotheek uitgebreid van 78 naar 334 producten (roerei, omelet, Belgische klassiekers, dranken, snacks, maaltijden) + online zoeken op naam via Open Food Facts
+
+## Updates zichtbaar maken op de snelkoppeling (2026-11-02)
+- [x] Versienummer (datum · git-hash) en knop "Zoek update" onder het profiel
+- [x] Service worker handmatig geregistreerd met updatecheck bij elke keer openen en elke 30 min; nieuwe versie herlaadt vanzelf
+- [x] Gepusht en live gecontroleerd

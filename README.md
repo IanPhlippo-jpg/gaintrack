@@ -18,7 +18,7 @@ npm run build
 ### Snelste weg (zonder Mac, geen 7-dagenlimiet): als web-app op het beginscherm
 1. Open https://ianphlippo-jpg.github.io/gaintrack/ in **Safari** op je iPhone.
 2. Tik op Deel → **Zet op beginscherm**. De app start dan schermvullend met eigen icoon, werkt offline (service worker) en bewaart alles op het toestel. Geen hersigneren, geen kabel.
-3. Updates komen vanzelf binnen bij de volgende start na een nieuwe publicatie.
+3. Updates komen vanzelf binnen: de app controleert bij elke keer openen (en elke 30 min) op een nieuwe versie en herlaadt dan. Onder het profiel-icoon zie je de versie (datum · git-hash) en staat een knop "Zoek update". Ziet je snelkoppeling de update niet, sluit de app dan volledig (app-kiezer, omhoog vegen) en open ze opnieuw.
 
 Liever op Vercel? Importeer de GitHub-repo op vercel.com (framework Vite wordt herkend, geen instellingen nodig). Laat `VITE_BASE` leeg: op Vercel staat de app op `/`. Alleen GitHub Pages heeft het basispad `/gaintrack/` nodig, dat zet de workflow zelf.
 

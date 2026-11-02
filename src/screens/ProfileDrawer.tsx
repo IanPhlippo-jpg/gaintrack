@@ -57,6 +57,7 @@ export function ProfileDrawer({ open, onOpenChange }: { open: boolean; onOpenCha
   const xp = useStore((s) => totalXp(s));
   const lp = levelProgress(xp);
   const [confirmReset, setConfirmReset] = React.useState(false);
+  const [updating, setUpdating] = React.useState(false);
 
   const latest = weights[weights.length - 1]?.kg ?? profile.startWeight;
   const applySuggestion = () => {
@@ -182,6 +183,27 @@ export function ProfileDrawer({ open, onOpenChange }: { open: boolean; onOpenCha
               Gegevens wissen
             </Button>
           )}
+        </div>
+
+        <div className="flex items-center justify-between rounded-2xl border bg-card p-3 text-xs text-muted-foreground">
+          <span>GainTrack · versie {__APP_VERSION__}</span>
+          <Button
+            size="sm"
+            variant="secondary"
+            disabled={updating}
+            onClick={async () => {
+              setUpdating(true);
+              try {
+                const reg = await navigator.serviceWorker?.getRegistration();
+                await reg?.update();
+              } catch {
+                /* geen service worker */
+              }
+              setTimeout(() => window.location.reload(), 1200);
+            }}
+          >
+            {updating ? "Bezig…" : "Zoek update"}
+          </Button>
         </div>
       </div>
     </Drawer>
