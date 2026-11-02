@@ -20,6 +20,22 @@ export interface Food {
   custom?: boolean;
   /** EAN/UPC-code, als het product gescand werd */
   barcode?: string;
+  /** Zoeksynoniemen (bv. "kippenwit" voor kipfilet-beleg), niet getoond */
+  aliases?: string[];
+  /** Samengesteld gerecht: ingrediënten met grammen; de waarden per 100 g zijn daaruit berekend */
+  recipe?: Recipe;
+}
+
+export interface RecipeIngredient {
+  foodId: string;
+  name: string;
+  grams: number;
+}
+
+export interface Recipe {
+  ingredients: RecipeIngredient[];
+  portions: number;
+  totalGrams: number;
 }
 
 export interface FoodEntry {

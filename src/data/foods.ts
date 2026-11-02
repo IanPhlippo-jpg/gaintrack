@@ -1,16 +1,17 @@
 import type { Food } from "@/store/types";
+import { EXTRA_FOODS } from "./foods-extra";
 
-const f = (id: string, name: string, kcal: number, protein: number, carbs: number, fat: number, portion = 100, portionLabel?: string): Food => ({
-  id, name, kcal, protein, carbs, fat, portion, portionLabel,
+const f = (id: string, name: string, kcal: number, protein: number, carbs: number, fat: number, portion = 100, portionLabel?: string, aliases?: string[]): Food => ({
+  id, name, kcal, protein, carbs, fat, portion, portionLabel, aliases,
 });
 
 /**
  * Basisvoedingsmiddelen (België/Nederland), waarden per 100 g of 100 ml, met een gangbare portie.
  * Bestaande id's blijven bestaan (favorieten en recent verwijzen ernaar). Merkproducten zoek je online of scan je.
  */
-export const SEED_FOODS: Food[] = [
+const BASE_FOODS: Food[] = [
   // ---------- Eieren ----------
-  f("eieren", "Ei (gekookt)", 155, 13, 1.1, 11, 60, "1 ei"),
+  f("eieren", "Ei (gekookt)", 155, 13, 1.1, 11, 60, "1 ei", ["gekookt ei", "eitje"]),
   f("eiwit", "Eiwit (van ei)", 52, 11, 0.7, 0.2, 33, "1 eiwit"),
   f("roerei", "Roerei (met beetje boter)", 170, 12, 1.5, 13, 120, "2 eieren"),
   f("roerei-mager", "Roerei (zonder vet)", 150, 13, 1.2, 10.5, 120, "2 eieren"),
@@ -46,10 +47,10 @@ export const SEED_FOODS: Food[] = [
   f("kipnuggets", "Kipnuggets", 290, 15, 18, 17, 100, "6 stuks"),
   f("kip-kerrie", "Kip met kerriesaus", 140, 14, 5, 7, 250),
   f("lamskotelet", "Lamskotelet", 280, 24, 0, 20, 120),
-  f("ham", "Gekookte ham (beleg)", 110, 19, 1, 3.5, 25, "1 sneetje"),
-  f("kipfilet-beleg", "Kipfilet (beleg)", 105, 21, 1, 2, 25, "1 sneetje"),
+  f("ham", "Gekookte ham (beleg)", 110, 19, 1, 3.5, 25, "1 sneetje", ["hesp", "york"]),
+  f("kipfilet-beleg", "Kipfilet (beleg)", 105, 21, 1, 2, 25, "1 sneetje", ["kippenwit", "kipwit"]),
   f("salami", "Salami", 400, 22, 1, 34, 20, "3 sneetjes"),
-  f("prepare", "Préparé (filet américain)", 230, 16, 3, 17, 40, "1 portie"),
+  f("prepare", "Préparé (filet américain)", 230, 16, 3, 17, 40, "1 portie", ["americain", "martino"]),
   f("pate", "Paté", 320, 13, 2, 29, 30, "1 portie"),
   f("kipsalade", "Kipsalade (beleg)", 260, 11, 6, 22, 40),
   // ---------- Vis en zeevruchten ----------
@@ -67,7 +68,7 @@ export const SEED_FOODS: Food[] = [
   f("mosselen", "Mosselen (gekookt, zonder schelp)", 110, 17, 4, 2.5, 200),
   f("surimi", "Surimi", 95, 8, 13, 0.5, 60),
   // ---------- Zuivel ----------
-  f("kwark", "Magere kwark", 55, 10, 3.5, 0.2, 250, "1 beker"),
+  f("kwark", "Magere kwark", 55, 10, 3.5, 0.2, 250, "1 beker", ["platte kaas mager", "quark"]),
   f("kwark-volle", "Volle kwark", 120, 8, 4, 8, 150),
   f("skyr", "Skyr naturel", 63, 11, 4, 0.2, 150),
   f("skyr-fruit", "Skyr met fruit", 80, 9, 9, 0.2, 150, "1 potje"),
@@ -84,7 +85,7 @@ export const SEED_FOODS: Food[] = [
   f("sojadrink", "Sojadrink (ongezoet)", 33, 3.3, 0.3, 1.8, 250, "1 glas"),
   f("havermelk", "Haverdrink", 45, 1, 7, 1.5, 250, "1 glas"),
   f("amandelmelk", "Amandeldrink (ongezoet)", 14, 0.5, 0.2, 1.1, 250, "1 glas"),
-  f("huttenkase", "Hüttenkäse", 98, 12, 3, 4.3, 100),
+  f("huttenkase", "Hüttenkäse", 98, 12, 3, 4.3, 100, undefined, ["cottage cheese", "huttenkase"]),
   f("gouda", "Gouda kaas (jong)", 356, 23, 0, 29, 30, "1 plak"),
   f("gouda-30", "Kaas 30+ (light)", 280, 29, 0, 18, 30, "1 plak"),
   f("emmental", "Emmental", 380, 29, 0, 29, 30, "1 plak"),
@@ -105,7 +106,7 @@ export const SEED_FOODS: Food[] = [
   f("volkoren-brood", "Volkorenbrood", 247, 9.7, 41, 3.4, 35, "1 snee"),
   f("wit-brood", "Wit brood", 265, 9, 49, 3.2, 35, "1 snee"),
   f("bruin-brood", "Bruin brood", 250, 9.5, 44, 3, 35, "1 snee"),
-  f("pistolet", "Pistolet (wit)", 280, 9, 55, 2, 50, "1 pistolet"),
+  f("pistolet", "Pistolet (wit)", 280, 9, 55, 2, 50, "1 pistolet", ["broodje", "sandwich"]),
   f("sandwich", "Sandwich (zacht broodje)", 320, 9, 52, 8, 45, "1 sandwich"),
   f("baguette", "Stokbrood", 275, 9, 55, 1.5, 60, "1 stuk"),
   f("speltbrood", "Speltbrood", 245, 10, 43, 2.5, 35, "1 snee"),
@@ -133,8 +134,8 @@ export const SEED_FOODS: Food[] = [
   f("chiazaad", "Chiazaad", 486, 17, 8, 31, 15, "1 el"),
   // ---------- Beleg en smeersels ----------
   f("pindakaas", "Pindakaas", 588, 25, 20, 50, 15, "1 el"),
-  f("choco", "Chocopasta", 539, 6, 57, 31, 20, "1 el"),
-  f("speculoospasta", "Speculoospasta", 570, 4, 58, 36, 20, "1 el"),
+  f("choco", "Chocopasta", 539, 6, 57, 31, 20, "1 el", ["nutella", "chocoladepasta", "kwatta"]),
+  f("speculoospasta", "Speculoospasta", 570, 4, 58, 36, 20, "1 el", ["lotus", "biscoff"]),
   f("confituur", "Confituur", 250, 0.3, 60, 0.1, 20, "1 el"),
   f("confituur-light", "Confituur light", 150, 0.4, 35, 0.1, 20, "1 el"),
   f("honing", "Honing", 304, 0.3, 82, 0, 20, "1 el"),
@@ -158,7 +159,7 @@ export const SEED_FOODS: Food[] = [
   f("aardappelpuree", "Aardappelpuree (met melk en boter)", 105, 2.5, 15, 4, 250),
   f("gebakken-aardappelen", "Gebakken aardappelen", 150, 2.5, 25, 5, 200),
   f("krieltjes", "Krieltjes (oven)", 120, 2.3, 22, 2.5, 200),
-  f("frieten", "Frieten", 312, 3.4, 41, 15, 150),
+  f("frieten", "Frieten", 312, 3.4, 41, 15, 150, undefined, ["friet", "patat", "frietjes"]),
   f("ovenfrieten", "Ovenfrieten", 220, 3.5, 35, 7, 150),
   f("kroketten", "Aardappelkroketten", 240, 3.5, 30, 12, 120, "6 stuks"),
   f("zoete-aardappel", "Zoete aardappel", 86, 1.6, 20, 0.1, 200),
@@ -299,10 +300,10 @@ export const SEED_FOODS: Food[] = [
   f("rijstsalade", "Rijstsalade", 150, 4, 20, 6, 250),
   f("pastasalade", "Pastasalade", 170, 5, 20, 8, 250),
   // ---------- Snacks en zoet ----------
-  f("chips", "Chips (naturel/paprika)", 530, 6, 52, 33, 30, "1 handvol"),
+  f("chips", "Chips (naturel/paprika)", 530, 6, 52, 33, 30, "1 handvol", ["lays", "croky"]),
   f("tortilla-chips", "Tortillachips", 500, 7, 60, 25, 30),
   f("popcorn-zoet", "Popcorn (zoet)", 450, 6, 70, 16, 30),
-  f("zoute-koekjes", "Zoute koekjes (TUC-type)", 490, 8, 62, 23, 25, "6 stuks"),
+  f("zoute-koekjes", "Zoute koekjes (TUC-type)", 490, 8, 62, 23, 25, "6 stuks", ["tuc", "crackers zout"]),
   f("speculoos", "Speculoos", 485, 5, 72, 19, 8, "1 koekje"),
   f("petit-beurre", "Petit beurre", 440, 7, 74, 12, 8, "1 koekje"),
   f("chocoladekoekje", "Chocoladekoekje", 500, 6, 62, 25, 15, "1 koekje"),
@@ -330,8 +331,8 @@ export const SEED_FOODS: Food[] = [
   f("latte", "Latte macchiato / cappuccino", 45, 2.5, 4, 2, 250, "1 beker"),
   f("thee", "Thee (zonder suiker)", 1, 0, 0.2, 0, 250, "1 kop"),
   f("cola", "Cola", 42, 0, 10.6, 0, 330, "1 blikje"),
-  f("cola-zero", "Cola zero / light", 0.3, 0, 0, 0, 330, "1 blikje"),
-  f("limonade", "Limonade / fanta", 40, 0, 10, 0, 330, "1 blikje"),
+  f("cola-zero", "Cola zero / light", 0.3, 0, 0, 0, 330, "1 blikje", ["pepsi max", "coca cola zero"]),
+  f("limonade", "Limonade / fanta", 40, 0, 10, 0, 330, "1 blikje", ["frisdrank", "orangina"]),
   f("ice-tea", "Ice tea", 30, 0, 7, 0, 330, "1 blikje"),
   f("energydrink", "Energiedrank (Red Bull-type)", 45, 0, 11, 0, 250, "1 blikje"),
   f("energydrink-zero", "Energiedrank suikervrij", 3, 0, 0, 0, 250, "1 blikje"),
@@ -350,7 +351,7 @@ export const SEED_FOODS: Food[] = [
   f("gin-tonic", "Gin-tonic", 75, 0, 7, 0, 250, "1 glas"),
   f("sterke-drank", "Sterke drank (40%)", 230, 0, 0, 0, 40, "1 shot"),
   // ---------- Supplementen ----------
-  f("whey", "Whey proteïne (poeder)", 380, 75, 8, 6, 30, "1 schep"),
+  f("whey", "Whey proteïne (poeder)", 380, 75, 8, 6, 30, "1 schep", ["eiwitpoeder", "proteine", "shake"]),
   f("whey-isolaat", "Whey isolaat (poeder)", 370, 85, 3, 1.5, 30, "1 schep"),
   f("caseine", "Caseïne (poeder)", 360, 75, 7, 3, 30, "1 schep"),
   f("plantaardig-eiwit", "Plantaardig eiwitpoeder", 370, 70, 10, 6, 30, "1 schep"),
@@ -360,3 +361,6 @@ export const SEED_FOODS: Food[] = [
   f("eiwit-yoghurt", "Proteïneyoghurt (HiPRO-type)", 60, 10, 4.5, 0, 160, "1 potje"),
   f("eiwitpannenkoek", "Eiwitpannenkoeken", 180, 15, 20, 4, 150, "3 kleine"),
 ];
+
+/** Volledige bibliotheek: basis + uitbreiding (dubbele id's krijgen voorrang vanuit de basis). */
+export const SEED_FOODS: Food[] = [...BASE_FOODS, ...EXTRA_FOODS.filter((e) => !BASE_FOODS.some((b) => b.id === e.id))];

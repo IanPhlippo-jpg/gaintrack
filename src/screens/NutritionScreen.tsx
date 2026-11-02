@@ -1,7 +1,8 @@
 import * as React from "react";
-import { Droplets, Plus, Search, Star, Trash2, ChevronRight, Minus, ScanBarcode, Loader2, Globe } from "lucide-react";
+import { Droplets, Plus, Search, Star, Trash2, ChevronRight, Minus, ScanBarcode, Loader2, Globe, ChefHat, Pencil } from "lucide-react";
 import { BarcodeScanner } from "@/components/barcode-scanner";
 import { lookupBarcode, searchCooldownLeft, searchProducts } from "@/lib/openfoodfacts";
+import { RecipeBuilder } from "@/screens/RecipeBuilder";
 import { PageHeader, Section, EmptyState } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -139,6 +140,7 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
   const [selected, setSelected] = React.useState<Food | null>(null);
   const [grams, setGrams] = React.useState(100);
   const [creating, setCreating] = React.useState(false);
+  const [recipe, setRecipe] = React.useState<false | "new" | Food>(false);
   const [scanning, setScanning] = React.useState(false);
   const [lookup, setLookup] = React.useState<{ code: string; status: "busy" | "notfound" } | null>(null);
   const [online, setOnline] = React.useState<{ q: string; status: "busy" | "done" | "error" | "cooldown"; results: Omit<Food, "id" | "custom">[]; wait?: number } | null>(null);
@@ -164,6 +166,7 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
       setQ("");
       setSelected(null);
       setCreating(false);
+      setRecipe(false);
       setScanning(false);
       setLookup(null);
       setOnline(null);
@@ -211,9 +214,18 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
     if (tab === "eigen") base = foods.filter((f) => f.custom);
     const norm = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
     const words = norm(q).split(/\s+/).filter(Boolean);
-    if (words.length) base = base.filter((f) => { const n = norm(f.name); return words.every((w) => n.includes(w)); });
+    if (words.length) base = base.filter((f) => { const n = norm(`${f.name} ${(f.aliases ?? []).join(" ")}`); return words.every((w) => n.includes(w)); });
     return base.slice(0, 80);
   }, [foods, tab, q, recentIds, state.favoriteFoodIds]);
+
+  // Niets in de bibliotheek? Dan na een korte pauze automatisch online zoeken (één verzoek, met cooldown).
+  React.useEffect(() => {
+    const query = q.trim();
+    if (tab !== "alles" || query.length < 3 || list.length > 0) return;
+    if (online && online.q === query) return;
+    const t = setTimeout(() => { void searchOnline(query); }, 700);
+    return () => clearTimeout(t);
+  }, [q, tab, list.length, online, searchOnline]);
 
   const pick = (f: Food) => {
     setSelected(f);
@@ -228,7 +240,7 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
   const mealLabel = MEAL_TYPES.find((m) => m.id === meal)?.label ?? "";
 
   return (
-    <Drawer open={!!meal} onOpenChange={(o) => !o && onClose()} title={selected ? selected.name : creating ? "Nieuw voedingsmiddel" : `Toevoegen aan ${mealLabel}`} description={selected ? `${selected.kcal} kcal · E ${selected.protein} · K ${selected.carbs} · V ${selected.fat} per 100 g` : undefined} full>
+    <Drawer open={!!meal} onOpenChange={(o) => !o && onClose()} title={selected ? selected.name : creating ? "Nieuw voedingsmiddel" : recipe ? (recipe === "new" ? "Nieuw gerecht" : "Gerecht bewerken") : `Toevoegen aan ${mealLabel}`} description={selected ? `${selected.kcal} kcal · E ${selected.protein} · K ${selected.carbs} · V ${selected.fat} per 100 g` : undefined} full>
       {selected ? (
         <div className="space-y-5">
           <div>
@@ -264,6 +276,12 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
             </Button>
           </div>
         </div>
+      ) : recipe ? (
+        <RecipeBuilder
+          initial={recipe === "new" ? undefined : recipe}
+          onDone={(f) => { setRecipe(false); pick(f); }}
+          onCancel={() => setRecipe(false)}
+        />
       ) : creating ? (
         <CustomFoodForm
           barcode={lookup?.code}
@@ -308,6 +326,9 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
             <Button className="h-12 shrink-0 px-3" onClick={() => setScanning(true)} aria-label="Barcode scannen">
               <ScanBarcode className="size-5" />
             </Button>
+            <Button variant="outline" className="h-12 shrink-0 px-3" onClick={() => setRecipe("new")} aria-label="Nieuw gerecht samenstellen">
+              <ChefHat className="size-5" />
+            </Button>
             <Button variant="outline" className="h-12 shrink-0 px-3" onClick={() => setCreating(true)} aria-label="Nieuw voedingsmiddel">
               <Plus className="size-5" />
             </Button>
@@ -335,12 +356,18 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
                   <li key={f.id} className="flex items-center gap-2 bg-card">
                     <button type="button" onClick={() => pick(f)} className="flex min-w-0 flex-1 items-center gap-3 px-4 py-3 text-left active:bg-accent/50">
                       <div className="min-w-0 flex-1">
-                        <p className="truncate text-sm font-medium">{f.name}</p>
+                        <p className="truncate text-sm font-medium">{f.recipe && <ChefHat className="mr-1 inline size-3.5 text-primary" />}{f.name}</p>
                         <p className="text-xs text-muted-foreground">
                           {f.portionLabel ?? `${f.portion} g`} · {round((f.kcal * f.portion) / 100)} kcal · E {round((f.protein * f.portion) / 100)} g
+                          {f.recipe && ` · ${f.recipe.ingredients.length} ingrediënten`}
                         </p>
                       </div>
                     </button>
+                    {f.recipe && (
+                      <button type="button" onClick={() => setRecipe(f)} aria-label="Gerecht bewerken" className="p-2 text-muted-foreground">
+                        <Pencil className="size-4" />
+                      </button>
+                    )}
                     <button type="button" onClick={() => state.toggleFavorite(f.id)} aria-label="Favoriet" className="p-3 text-muted-foreground">
                       <Star className={cn("size-4", fav && "fill-chart-2 text-chart-2")} />
                     </button>

@@ -41,6 +41,7 @@ export interface AppState {
 
   // voeding
   addCustomFood: (food: Omit<Food, "id" | "custom">) => Food;
+  updateCustomFood: (id: string, patch: Partial<Omit<Food, "id" | "custom">>) => void;
   removeCustomFood: (id: string) => void;
   toggleFavorite: (foodId: string) => void;
   logFood: (day: string, meal: MealType, food: Food, grams: number) => void;
@@ -129,6 +130,7 @@ export const useStore = create<AppState>()(
         set((s) => ({ customFoods: [f, ...s.customFoods] }));
         return f;
       },
+      updateCustomFood: (id, patch) => set((s) => ({ customFoods: s.customFoods.map((f) => (f.id === id ? { ...f, ...patch } : f)) })),
       removeCustomFood: (id) => set((s) => ({ customFoods: s.customFoods.filter((f) => f.id !== id) })),
       toggleFavorite: (foodId) =>
         set((s) => ({

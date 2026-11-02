@@ -75,11 +75,14 @@ Training → **Nieuw schema**: naam en emoji, trainingsdagen, en oefeningen die 
 Op Vandaag staat het **weekklassement** (XP van maandag tot zondag, met trainingen, sets en perfecte dagen als tiebreak), met een paneel per week. Zonder server telt het de accounts op dit toestel. Met Supabase (gratis) zien spelers elkaar ook op andere gsm's: voer `supabase/schema.sql` uit in het Supabase-project en zet `VITE_SUPABASE_URL` en `VITE_SUPABASE_ANON_KEY` als Actions-variabelen in de repo (Settings → Secrets and variables → Actions → Variables); de workflow bouwt ze mee. Elke speler stuurt dan zijn naam, foto en weekscore naar de tabellen `players` en `scores`.
 Een **profielfoto** kies je onder het profiel-icoon (verkleind tot 256 px, lokaal bewaard, meegestuurd naar het klassement).
 
+## Gerechten samenstellen
+In de voedingskiezer: koksmuts-icoon → **Nieuw gerecht**. Geef een naam, zoek ingrediënten uit de bibliotheek en zet per ingrediënt de hoeveelheid in gram; kies het aantal porties. De app telt kcal, eiwit, koolhydraten en vet op (totaal en per portie) en bewaart het gerecht als eigen voedingsmiddel met waarden per 100 g en "1 portie" als standaardhoeveelheid. Gerechten staan onder Eigen met een koksmuts en zijn via het potlood aan te passen.
+
 ## Voeding zoeken
-Ruim 330 basisproducten (België/Nederland: eieren en roerei, vlees, vis, zuivel, brood en beleg, maaltijden, snacks, dranken, supplementen) met gangbare porties. Zoeken negeert accenten en matcht alle woorden. Staat iets er niet in, dan zoek je het **online** (Open Food Facts v2, op merk en categorie) of scan je de barcode; gevonden producten komen onder Eigen en werken daarna offline.
+729 basisproducten (België/Nederland: eieren en roerei, vlees, vis, zuivel, brood en beleg, maaltijden, snacks, dranken, supplementen) met gangbare porties. Zoeken negeert accenten, matcht alle woorden en kent synoniemen (kippenwit, hesp, tuc, nutella, friet, …). Vindt de bibliotheek niets, dan zoekt de app na een seconde automatisch **online** (Open Food Facts v2, op merk en categorie) of scan je de barcode; gevonden producten komen onder Eigen en werken daarna offline.
 
 ## Barcodes scannen
-In de voedingskiezer: tik op het barcode-icoon, richt de camera op de streepjescode. De app gebruikt de ingebouwde BarcodeDetector of ZXing en zoekt het product op bij Open Food Facts (waarden per 100 g). Gevonden producten worden bewaard als eigen voedingsmiddel, dus de volgende scan werkt ook offline. Niet gevonden? Dan vul je het zelf in, gekoppeld aan de barcode.
+In de voedingskiezer: tik op het barcode-icoon en dan op **Camera openen** (iOS laat de camera pas toe na een tik). Richt de camera op de streepjescode. Lukt het niet, neem dan een **foto van de barcode** (wordt uitgelezen) of typ de code. De app gebruikt de ingebouwde BarcodeDetector of ZXing en zoekt het product op bij Open Food Facts (waarden per 100 g). Gevonden producten worden bewaard als eigen voedingsmiddel, dus de volgende scan werkt ook offline. Niet gevonden? Dan vul je het zelf in, gekoppeld aan de barcode.
 
 ## Instellingen (profiel-icoon)
 Profiel en doelen, herberekenen van macro's, rusttimer (aan/uit, standaardrust, overal dezelfde rust), trillen, alles wissen.

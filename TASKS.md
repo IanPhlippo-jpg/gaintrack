@@ -63,3 +63,11 @@
 - [x] Versienummer (datum · git-hash) en knop "Zoek update" onder het profiel
 - [x] Service worker handmatig geregistreerd met updatecheck bij elke keer openen en elke 30 min; nieuwe versie herlaadt vanzelf
 - [x] Gepusht en live gecontroleerd
+
+## Voedingslijst echt uitgebreid + synoniemen (2026-11-02)
+- [x] Food krijgt `aliases` (zoeksynoniemen zoals kippenwit, hesp, tuc); zoeken matcht op naam + synoniemen
+- [x] Automatisch online zoeken (Open Food Facts) zodra de bibliotheek niets vindt, met cooldown
+- [x] foods-extra.ts: 395 extra producten (totaal 729) (charcuterie, crackers en koeken, kazen, vis, maaltijden, fastfood, snoep, dranken, supplementen)
+- [x] Dubbele id's gecontroleerd (0), build, pushen, live controleren
+- [x] Gerechten: eigen recept uit ingrediënten (grammen per ingrediënt, aantal porties), totalen en per-100 g berekend, bewaard als eigen voedingsmiddel met ingrediëntenlijst
+- [x] Barcodescanner robuuster op iPhone-PWA: camera start pas na tik (gebruikersgebaar), duidelijke foutmelding, fallback via foto nemen (ZXing op afbeelding), handmatig typen blijft
