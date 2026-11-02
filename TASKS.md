@@ -19,3 +19,10 @@
 - [x] Rusttimer en trillen instelbaar onder profiel-icoon (aan/uit, standaardrust, overal dezelfde rust)
 - [x] Testen in browser op iPhone-formaat + screenshots (docs/screenshots)
 - [x] iOS-project gegenereerd (ios/, camera-rechten in Info.plist) + uitleg in README; echte build vereist Mac of cloudbuild
+
+## iOS-app bouwen zonder Mac (2026-11-02)
+- [x] iOS-iconen en splash genereren uit een 1024px-logo (@capacitor/assets)
+- [x] GitHub Actions-workflow: macOS-runner bouwt web + Capacitor en levert een unsigned .ipa als artifact (+ TestFlight-workflow)
+- [~] Repo aanmaken en pushen, eerste cloudbuild starten (publiceren via GitHub Desktop: gh-CLI ontbreekt op deze pc)
+- [x] README: .ipa installeren vanaf Windows (Sideloadly, gratis Apple ID) en de TestFlight-route met Apple Developer-account
+- [ ] Buildresultaat controleren en .ipa-link doorgeven

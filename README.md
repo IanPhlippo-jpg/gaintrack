@@ -17,12 +17,30 @@ npm run build
 1. `npm run build` en zet de map `dist/` online (Netlify, Vercel, eigen server) of serveer ze lokaal met `npm run preview`.
 2. Open de link in Safari op je iPhone → Deel → **Zet op beginscherm**. De app draait dan schermvullend als PWA en bewaart je gegevens op het toestel.
 
-### Echte iOS-app (App Store / TestFlight), vereist een Mac met Xcode
+### Echte iOS-app zonder Mac: cloudbuild + Sideloadly
+De workflow `.github/workflows/ios-build.yml` bouwt bij elke push op een macOS-runner van GitHub een **unsigned .ipa** en zet die als artifact bij de run (Actions → iOS build → Artifacts → `GainTrack-unsigned-ipa`).
+
+Zo zet je die op je iPhone vanaf Windows (gratis Apple ID volstaat):
+1. Installeer [Sideloadly](https://sideloadly.io) op je pc en iTunes (Microsoft Store-versie werkt niet; neem de versie van apple.com) voor de USB-driver.
+2. Sluit je iPhone aan met een kabel en tik op *Vertrouw deze computer*.
+3. Download de .ipa uit het artifact (zip uitpakken → `GainTrack-unsigned.ipa`) en sleep hem in Sideloadly.
+4. Vul je Apple ID in en klik *Start*. Sideloadly signeert de app met jouw account en installeert ze.
+5. Op de iPhone: Instellingen → Algemeen → VPN en apparaatbeheer → vertrouw je Apple ID. Daarna start GainTrack gewoon vanaf het beginscherm.
+
+Met een gratis Apple ID blijft de app 7 dagen geldig; daarna sleep je dezelfde .ipa opnieuw in Sideloadly (je gegevens blijven bewaard). Met een betaald Apple Developer-account is dat 1 jaar.
+
+### TestFlight / App Store (Apple Developer-account, 99 EUR per jaar)
+`.github/workflows/ios-testflight.yml` archiveert, signeert en uploadt naar TestFlight. Zet de secrets uit het commentaar bovenaan dat bestand in de repository (Settings → Secrets → Actions) en start de workflow handmatig via *Run workflow*.
+
+### Met een Mac
 ```bash
-npm run ios:sync   # bouwt de web-app en maakt/synct het ios/-project
+npm run ios:sync   # bouwt de web-app en synct het ios/-project
 npm run ios:open   # opent ios/App in Xcode
 ```
-In Xcode: kies je team onder *Signing & Capabilities*, sluit je iPhone aan en druk op Run. Zonder Mac kun je dezelfde `ios/`-map laten bouwen met een cloud-dienst zoals Codemagic of Ionic Appflow.
+In Xcode: kies je team onder *Signing & Capabilities*, sluit je iPhone aan en druk op Run.
+
+### Iconen en splash
+`assets/logo.png`, `assets/logo-dark.png` en `assets/splash*.png` zijn de bronbestanden; `npx @capacitor/assets generate --ios` maakt daaruit alle iOS-formaten in `ios/App/App/Assets.xcassets`.
 
 ## Structuur
 - `src/screens/` – Vandaag, Voeding, Training (+ actieve training, oefeningen, historiek), Gewicht, Statistieken, onboarding, profiel
