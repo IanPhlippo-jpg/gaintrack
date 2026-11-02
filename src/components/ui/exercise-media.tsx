@@ -3,7 +3,8 @@
  *
  * - Toont een foto van iemand die de oefening uitvoert (startpositie en eindpositie wisselen af).
  * - Vaste verhouding 4:3, afgeronde hoeken, donker verloop onderaan met spiergroep en materiaal.
- * - Tik op de foto om tussen start/eind te wisselen; met `auto` wisselt hij vanzelf.
+ * - Met `auto` wisselt hij vanzelf; met `interactive` (standaard enkel bij size "hero") wisselt een tik op de foto.
+ *   In lijsten en kiezers is de foto niet interactief, zodat de tik bij de kaart of knop eromheen terechtkomt.
  * - Zonder foto: silhouet-placeholder met het eerste letterteken.
  */
 import * as React from "react";
@@ -19,11 +20,13 @@ export interface ExerciseMediaProps {
   auto?: boolean;
   className?: string;
   showLabels?: boolean;
+  /** Tik op de foto wisselt start/eind; uit in lijsten zodat de ouder de tik krijgt. */
+  interactive?: boolean;
 }
 
 const sizeClass = { thumb: "h-16 w-16 rounded-xl", card: "aspect-[4/3] w-full rounded-2xl", hero: "aspect-[4/3] w-full rounded-3xl" } as const;
 
-export function ExerciseMedia({ exercise, size = "card", auto = size !== "thumb", className, showLabels = size !== "thumb" }: ExerciseMediaProps) {
+export function ExerciseMedia({ exercise, size = "card", auto = size !== "thumb", className, showLabels = size !== "thumb", interactive = size === "hero" }: ExerciseMediaProps) {
   const [frame, setFrame] = React.useState<0 | 1>(0);
   const [failed, setFailed] = React.useState(false);
   const hasDb = !!exercise.dbId && !failed;
@@ -38,11 +41,15 @@ export function ExerciseMedia({ exercise, size = "card", auto = size !== "thumb"
   return (
     <div
       className={cn("relative shrink-0 select-none overflow-hidden bg-[#ECE8F5] dark:bg-[#2A1E4D]", sizeClass[size], className)}
-      onClick={(e) => {
-        if (!hasDb || exercise.photo) return;
-        e.stopPropagation();
-        setFrame((f) => (f === 0 ? 1 : 0));
-      }}
+      onClick={
+        interactive
+          ? (e) => {
+              if (!hasDb || exercise.photo) return;
+              e.stopPropagation();
+              setFrame((f) => (f === 0 ? 1 : 0));
+            }
+          : undefined
+      }
       role="img"
       aria-label={`Foto van de oefening ${exercise.name}`}
     >

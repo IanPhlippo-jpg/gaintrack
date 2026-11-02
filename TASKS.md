@@ -48,3 +48,13 @@
 ## Bugfix: getal typen in NumberStepper sprong naar 300 kg (2026-11-02)
 - [x] Typbuffer in NumberStepper: pas afronden/begrenzen bij verlaten van het veld of Enter; selectie bij focus ook op iOS
 - [x] Testen in browser (gewicht in quiz, profiel) en pushen naar GitHub Pages
+
+## Eigen schema's beter maken + splits per aantal dagen met glute-focus voor vrouwen (2026-11-02)
+- [x] Schema-editor herbouwen: emoji-keuze, dagen, inklapbare oefeningrijen met grote steppers, meerdere oefeningen tegelijk toevoegen; bug gefixt dat oefeningen niet aan te tikken waren (foto ving de tik op)
+- [x] Programma's uitbreiden naar 20: vrouwen 2-6 dagen met glute-focus (hip thrust, RDL, abductie, kickbacks), mannen 2-6 dagen, iedereen 2-4 dagen
+- [x] Programmakiezer met filter op dagen per week en aanbeveling uit de quiz
+- [x] Alle oefening-id's in de programma's gecontroleerd tegen de oefeningenlijst (390 verwijzingen, 0 ontbrekend)
+- [x] Getest in browser (nieuw schema met 3 oefeningen, programma-filter 5 dagen vrouwen, klassement, roerei-zoeken); screenshots 16-18; online zoeken enkel beperkt testbaar door OFF-rate-limit
+- [x] Profielfoto per account (upload, verkleind naar 256 px) in profiel, kop, vergrendelscherm en klassement
+- [x] Weekklassement op Vandaag (top 3 + paneel per week); synchronisatie via Supabase voorbereid (src/lib/sync.ts, supabase/schema.sql, variabelen in pages.yml)
+- [x] Voedingsbibliotheek uitgebreid van 78 naar 334 producten (roerei, omelet, Belgische klassiekers, dranken, snacks, maaltijden) + online zoeken op naam via Open Food Facts

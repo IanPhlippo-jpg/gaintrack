@@ -1,7 +1,7 @@
 import * as React from "react";
-import { Droplets, Plus, Search, Star, Trash2, ChevronRight, Minus, ScanBarcode, Loader2 } from "lucide-react";
+import { Droplets, Plus, Search, Star, Trash2, ChevronRight, Minus, ScanBarcode, Loader2, Globe } from "lucide-react";
 import { BarcodeScanner } from "@/components/barcode-scanner";
-import { lookupBarcode } from "@/lib/openfoodfacts";
+import { lookupBarcode, searchCooldownLeft, searchProducts } from "@/lib/openfoodfacts";
 import { PageHeader, Section, EmptyState } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
@@ -141,7 +141,23 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
   const [creating, setCreating] = React.useState(false);
   const [scanning, setScanning] = React.useState(false);
   const [lookup, setLookup] = React.useState<{ code: string; status: "busy" | "notfound" } | null>(null);
+  const [online, setOnline] = React.useState<{ q: string; status: "busy" | "done" | "error" | "cooldown"; results: Omit<Food, "id" | "custom">[]; wait?: number } | null>(null);
   const foods = allFoods(state);
+
+  const searchOnline = React.useCallback(async (query: string) => {
+    const wait = searchCooldownLeft();
+    if (wait > 0) {
+      setOnline({ q: query, status: "cooldown", results: [], wait });
+      return;
+    }
+    setOnline({ q: query, status: "busy", results: [] });
+    try {
+      const results = await searchProducts(query);
+      setOnline({ q: query, status: "done", results });
+    } catch {
+      setOnline({ q: query, status: "error", results: [] });
+    }
+  }, []);
 
   React.useEffect(() => {
     if (!meal) {
@@ -150,6 +166,7 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
       setCreating(false);
       setScanning(false);
       setLookup(null);
+      setOnline(null);
     }
   }, [meal]);
 
@@ -192,8 +209,9 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
     if (tab === "favoriet") base = foods.filter((f) => state.favoriteFoodIds.includes(f.id));
     if (tab === "recent") base = recentIds.map((id) => foods.find((f) => f.id === id)).filter((f): f is Food => !!f);
     if (tab === "eigen") base = foods.filter((f) => f.custom);
-    const query = q.trim().toLowerCase();
-    if (query) base = base.filter((f) => f.name.toLowerCase().includes(query));
+    const norm = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+    const words = norm(q).split(/\s+/).filter(Boolean);
+    if (words.length) base = base.filter((f) => { const n = norm(f.name); return words.every((w) => n.includes(w)); });
     return base.slice(0, 80);
   }, [foods, tab, q, recentIds, state.favoriteFoodIds]);
 
@@ -307,9 +325,9 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
             ]}
             className="text-xs [&_button]:px-2"
           />
-          {list.length === 0 ? (
-            <EmptyState icon="🔍" title="Niets gevonden" desc="Maak het zelf aan met 'Nieuw'." />
-          ) : (
+          {list.length === 0 && !online ? (
+            <EmptyState icon="🔍" title="Niets gevonden in de bibliotheek" desc="Zoek het product online (winkelproducten) of maak het zelf aan met +." />
+          ) : list.length === 0 ? null : (
             <ul className="divide-y divide-border overflow-hidden rounded-2xl border">
               {list.map((f) => {
                 const fav = state.favoriteFoodIds.includes(f.id);
@@ -330,6 +348,45 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
                 );
               })}
             </ul>
+          )}
+          {q.trim().length >= 2 && tab === "alles" && (
+            <div className="space-y-2">
+              {(!online || online.q !== q.trim() || online.status === "cooldown" || online.status === "error") && (
+                <Button variant="outline" className="w-full" onClick={() => void searchOnline(q.trim())}>
+                  <Globe className="size-4" /> Zoek “{q.trim()}” online (winkelproducten)
+                </Button>
+              )}
+              {online && online.q === q.trim() && online.status === "busy" && (
+                <p className="flex items-center justify-center gap-2 py-3 text-sm text-muted-foreground"><Loader2 className="size-4 animate-spin" /> Zoeken bij Open Food Facts…</p>
+              )}
+              {online && online.q === q.trim() && online.status === "error" && <p className="text-center text-xs text-destructive">Online zoeken lukte niet: geen verbinding, of te veel zoekopdrachten na elkaar. Probeer over een paar seconden opnieuw.</p>}
+              {online && online.q === q.trim() && online.status === "cooldown" && (
+                <p className="text-center text-xs text-muted-foreground">Even wachten: Open Food Facts laat één zoekopdracht per paar seconden toe. Probeer over {online.wait} s opnieuw.</p>
+              )}
+              {online && online.q === q.trim() && online.status === "done" && (
+                online.results.length === 0 ? (
+                  <p className="text-center text-xs text-muted-foreground">Niets gevonden online. Maak het zelf aan met +.</p>
+                ) : (
+                  <>
+                    <p className="pt-1 text-xs font-bold uppercase tracking-wide text-muted-foreground">Online gevonden · per 100 g</p>
+                    <ul className="divide-y divide-border overflow-hidden rounded-2xl border">
+                      {online.results.map((r, i) => (
+                        <li key={`${r.barcode ?? r.name}-${i}`}>
+                          <button type="button" onClick={() => pick(state.addCustomFood(r))} className="flex w-full items-center gap-3 bg-card px-4 py-3 text-left active:bg-accent/50">
+                            <div className="min-w-0 flex-1">
+                              <p className="truncate text-sm font-medium">{r.name}</p>
+                              <p className="text-xs text-muted-foreground">{r.kcal} kcal · E {r.protein} · K {r.carbs} · V {r.fat}</p>
+                            </div>
+                            <Plus className="size-4 shrink-0 text-muted-foreground" />
+                          </button>
+                        </li>
+                      ))}
+                    </ul>
+                    <p className="text-center text-[11px] text-muted-foreground">Gekozen producten worden bewaard onder Eigen, dus volgende keer werkt het ook offline.</p>
+                  </>
+                )
+              )}
+            </div>
           )}
         </div>
       )}

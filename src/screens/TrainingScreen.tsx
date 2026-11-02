@@ -1,20 +1,20 @@
 import * as React from "react";
 import { motion } from "motion/react";
-import { ArrowDown, ArrowUp, Clock, Pencil, Play, Plus, Trash2, Trophy } from "lucide-react";
+import { Clock, Pencil, Play, Plus, Trash2, Trophy } from "lucide-react";
 import { PageHeader, Section, EmptyState } from "@/components/page-header";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Drawer } from "@/components/ui/drawer";
-import { NumberStepper } from "@/components/ui/number-stepper";
 import { ExerciseMedia } from "@/components/ui/exercise-media";
 import AnimatedTabs from "@/components/ui/animated-tabs";
 import { ActiveWorkout, WorkoutSummary } from "./ActiveWorkout";
-import { CustomExerciseForm, ExercisePicker, useExerciseSearch, dbToExercise } from "./ExercisePicker";
+import { CustomExerciseForm, useExerciseSearch, dbToExercise } from "./ExercisePicker";
+import { RoutineEditor } from "./RoutineEditor";
+import { ProgramsDrawer } from "./ProgramsDrawer";
 import { useStore } from "@/store/useStore";
 import type { Exercise, Routine, Workout } from "@/store/types";
 import { EQUIPMENT, MUSCLES, MUSCLE_GROUPS } from "@/data/exercises";
-import { PROGRAMS, type Program } from "@/data/programs";
 import { exerciseById, lastPerformance, personalRecords, routinesForDay, strengthHistory } from "@/lib/stats";
 import { durationMin, workoutSets, workoutVolume } from "@/lib/calc";
 import { fmtDay, fmtShort, todayKey, WEEKDAYS_NL } from "@/lib/date";
@@ -97,72 +97,6 @@ function RoutinesTab() {
   );
 }
 
-type ProgramGroup = "vrouw" | "man" | "iedereen";
-
-function ProgramsDrawer({ open, onClose }: { open: boolean; onClose: () => void }) {
-  const state = useStore();
-  const [group, setGroup] = React.useState<ProgramGroup>(state.profile.gender === "vrouw" ? "vrouw" : state.profile.gender === "man" ? "man" : "iedereen");
-  const [confirm, setConfirm] = React.useState<Program | null>(null);
-  const list = PROGRAMS.filter((p) => p.gender === group).sort((a, b) => a.days - b.days);
-  const activeId = state.profile.programId;
-
-  return (
-    <>
-      <Drawer open={open} onOpenChange={(o) => !o && onClose()} title="Trainingsprogramma's" description="Kant-en-klare schema's, opgesplitst voor vrouwen en mannen. Je kunt elk schema daarna aanpassen." full>
-        <AnimatedTabs<ProgramGroup> variant="segment" activeTab={group} onChange={setGroup} tabs={[{ id: "vrouw", label: "Vrouwen" }, { id: "man", label: "Mannen" }, { id: "iedereen", label: "Iedereen" }]} className="mb-3" />
-        <div className="space-y-3">
-          {list.map((p) => {
-            const isActive = activeId === p.id;
-            return (
-              <div key={p.id} className={cn("rounded-2xl border bg-card p-4", isActive && "border-primary bg-primary/10")}>
-                <div className="flex items-start justify-between gap-2">
-                  <div className="min-w-0">
-                    <p className="font-bold">
-                      {p.name} {isActive && <span className="ml-1 rounded-full bg-primary px-2 py-0.5 text-[10px] font-bold text-primary-foreground">Actief</span>}
-                    </p>
-                    <p className="text-xs text-muted-foreground">
-                      {p.days} dagen · {p.level} · {p.focus}
-                    </p>
-                  </div>
-                  <span className="shrink-0 text-2xl">{p.routines[0]?.emoji}</span>
-                </div>
-                <p className="mt-1.5 text-sm text-muted-foreground">{p.desc}</p>
-                <div className="mt-3 space-y-1">
-                  {p.routines.map((r) => (
-                    <div key={r.id} className="flex items-center gap-2 text-xs">
-                      <span className="w-14 shrink-0 font-semibold text-muted-foreground">{r.days.map((d) => WEEKDAYS_NL[d]).join("/")}</span>
-                      <span className="truncate">{r.name}</span>
-                      <span className="ml-auto shrink-0 text-muted-foreground">{r.exercises.length} oef.</span>
-                    </div>
-                  ))}
-                </div>
-                <div className="mt-3 flex gap-2">
-                  <Button size="sm" className="flex-1" disabled={isActive} onClick={() => setConfirm(p)}>
-                    {isActive ? "In gebruik" : "Gebruik dit programma"}
-                  </Button>
-                  <Button size="sm" variant="secondary" onClick={() => { state.applyProgram(p.id, p.routines, false); onClose(); }}>
-                    Voeg toe
-                  </Button>
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      </Drawer>
-      <Drawer open={!!confirm} onOpenChange={(o) => !o && setConfirm(null)} title="Programma wisselen?" description="Je huidige schema's worden vervangen. Je trainingshistoriek en records blijven bewaard.">
-        <div className="flex gap-2">
-          <Button size="lg" className="flex-1" onClick={() => { if (confirm) state.applyProgram(confirm.id, confirm.routines, true); setConfirm(null); onClose(); }}>
-            Ja, vervang
-          </Button>
-          <Button size="lg" variant="secondary" onClick={() => setConfirm(null)}>
-            Annuleer
-          </Button>
-        </div>
-      </Drawer>
-    </>
-  );
-}
-
 /** Op basis van de 21st.dev "Workout Card" (ravikatiyar162): header met duur en een gestaffeld animerende oefeningenlijst. */
 function RoutineCard({ routine, isToday, index, onEdit, onStart }: { routine: Routine; isToday: boolean; index: number; onEdit: () => void; onStart: () => void }) {
   const state = useStore();
@@ -222,97 +156,6 @@ function RoutineCard({ routine, isToday, index, onEdit, onStart }: { routine: Ro
         </div>
       </div>
     </motion.div>
-  );
-}
-
-function RoutineEditor({ routine, onClose }: { routine: Routine | null; onClose: () => void }) {
-  const state = useStore();
-  const [draft, setDraft] = React.useState<Routine | null>(routine);
-  const [picker, setPicker] = React.useState(false);
-  React.useEffect(() => setDraft(routine), [routine]);
-  if (!draft) return <Drawer open={false} onOpenChange={() => {}}>{null}</Drawer>;
-  const isNew = !state.routines.some((r) => r.id === draft.id);
-  const update = (patch: Partial<Routine>) => setDraft((d) => (d ? { ...d, ...patch } : d));
-  const move = (i: number, dir: -1 | 1) => {
-    const arr = [...draft.exercises];
-    const j = i + dir;
-    if (j < 0 || j >= arr.length) return;
-    [arr[i], arr[j]] = [arr[j], arr[i]];
-    update({ exercises: arr });
-  };
-
-  return (
-    <Drawer open={!!routine} onOpenChange={(o) => !o && onClose()} title={isNew ? "Nieuw schema" : "Schema bewerken"} full>
-      <div className="space-y-4">
-        <div className="flex gap-2">
-          <Input value={draft.emoji} onChange={(e) => update({ emoji: e.target.value.slice(-2) })} className="w-16 text-center text-xl" aria-label="Emoji" />
-          <Input value={draft.name} onChange={(e) => update({ name: e.target.value })} placeholder="Naam, bv. Push A" className="flex-1" />
-        </div>
-        <div>
-          <p className="mb-1.5 text-sm font-semibold">Trainingsdagen</p>
-          <div className="grid grid-cols-7 gap-1">
-            {[1, 2, 3, 4, 5, 6, 0].map((d) => (
-              <button key={d} type="button" onClick={() => update({ days: draft.days.includes(d) ? draft.days.filter((x) => x !== d) : [...draft.days, d] })} className={cn("rounded-xl border py-2 text-xs font-bold", draft.days.includes(d) ? "border-primary bg-primary text-primary-foreground" : "bg-card")}>
-                {WEEKDAYS_NL[d]}
-              </button>
-            ))}
-          </div>
-        </div>
-        <div>
-          <p className="mb-1.5 text-sm font-semibold">Oefeningen</p>
-          <div className="space-y-2">
-            {draft.exercises.map((rx, i) => {
-              const ex = exerciseById(state, rx.exerciseId);
-              return (
-                <div key={`${rx.exerciseId}-${i}`} className="rounded-2xl border bg-card p-3">
-                  <div className="flex items-center gap-3">
-                    {ex && <ExerciseMedia exercise={ex} size="thumb" showLabels={false} auto={false} className="h-12 w-12" />}
-                    <p className="min-w-0 flex-1 truncate text-sm font-semibold">{ex?.name ?? rx.exerciseId}</p>
-                    <button type="button" onClick={() => move(i, -1)} className="p-1 text-muted-foreground" aria-label="Omhoog">
-                      <ArrowUp className="size-4" />
-                    </button>
-                    <button type="button" onClick={() => move(i, 1)} className="p-1 text-muted-foreground" aria-label="Omlaag">
-                      <ArrowDown className="size-4" />
-                    </button>
-                    <button type="button" onClick={() => update({ exercises: draft.exercises.filter((_, j) => j !== i) })} className="p-1 text-destructive" aria-label="Verwijderen">
-                      <Trash2 className="size-4" />
-                    </button>
-                  </div>
-                  <div className="mt-2 grid grid-cols-3 gap-2">
-                    {(
-                      [
-                        ["sets", "Sets", 1, 1, 10],
-                        ["reps", "Herh.", 1, 1, 100],
-                        ["restSec", "Rust (s)", 15, 0, 600],
-                      ] as ["sets" | "reps" | "restSec", string, number, number, number][]
-                    ).map(([k, l, step, min, max]) => (
-                      <div key={k}>
-                        <p className="mb-0.5 text-[10px] font-semibold uppercase text-muted-foreground">{l}</p>
-                        <NumberStepper value={rx[k]} step={step} min={min} max={max} onChange={(v) => update({ exercises: draft.exercises.map((x, j) => (j === i ? { ...x, [k]: v } : x)) })} />
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-          <Button variant="outline" className="mt-2 w-full border-dashed" onClick={() => setPicker(true)}>
-            <Plus className="size-4" /> Oefening toevoegen
-          </Button>
-        </div>
-        <div className="flex gap-2 pt-2">
-          {!isNew && (
-            <Button variant="destructive" size="lg" onClick={() => { state.removeRoutine(draft.id); onClose(); }} aria-label="Schema verwijderen">
-              <Trash2 className="size-4" />
-            </Button>
-          )}
-          <Button size="lg" className="flex-1" disabled={draft.name.trim().length < 2} onClick={() => { state.saveRoutine({ ...draft, name: draft.name.trim() }); onClose(); }}>
-            Schema opslaan
-          </Button>
-        </div>
-      </div>
-      <ExercisePicker open={picker} onClose={() => setPicker(false)} onPick={(e) => { update({ exercises: [...draft.exercises, { exerciseId: e.id, sets: 3, reps: 10, restSec: 90 }] }); setPicker(false); }} />
-    </Drawer>
   );
 }
 

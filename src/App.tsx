@@ -14,6 +14,7 @@ import { StatsScreen } from "@/screens/StatsScreen";
 import { Onboarding } from "@/screens/Onboarding";
 import { ProfileDrawer } from "@/screens/ProfileDrawer";
 import { AccountGate } from "@/screens/LockScreen";
+import { useScoreSync } from "@/screens/Leaderboard";
 
 export type Tab = "vandaag" | "voeding" | "training" | "gewicht" | "stats";
 
@@ -34,6 +35,7 @@ function Shell() {
   const [tab, setTab] = React.useState<Tab>("vandaag");
   const [profileOpen, setProfileOpen] = React.useState(false);
   useGoalEngine();
+  useScoreSync();
 
   const nav = React.useMemo(() => ({ go: setTab, openProfile: () => setProfileOpen(true) }), []);
 

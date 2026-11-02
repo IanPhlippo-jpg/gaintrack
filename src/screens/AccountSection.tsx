@@ -3,12 +3,13 @@
  * en voor de beheerder de lijst toegangscodes om uit te delen.
  */
 import * as React from "react";
-import { Check, Copy, KeyRound, LogOut, ShieldCheck } from "lucide-react";
+import { Camera, Check, Copy, KeyRound, LogOut, ShieldCheck, X } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Avatar, useAccount } from "@/screens/LockScreen";
 import { allInviteCodes, saveRegistry } from "@/lib/accounts";
 import { INVITE_COUNT } from "@/lib/invite-secrets";
+import { fileToDataUrl } from "@/screens/ExercisePicker";
 import { cn } from "@/lib/utils";
 
 function PinInput({ value, onChange, placeholder }: { value: string; onChange: (v: string) => void; placeholder: string }) {
@@ -27,7 +28,8 @@ function PinInput({ value, onChange, placeholder }: { value: string; onChange: (
 }
 
 export function AccountSection() {
-  const { account, logout, changePin } = useAccount();
+  const { account, logout, changePin, setPhoto } = useAccount();
+  const fileRef = React.useRef<HTMLInputElement>(null);
   const [editPin, setEditPin] = React.useState(false);
   const [p1, setP1] = React.useState("");
   const [p2, setP2] = React.useState("");
@@ -45,10 +47,35 @@ export function AccountSection() {
   return (
     <div className="rounded-2xl border bg-card p-4">
       <div className="flex items-center gap-3">
-        <Avatar account={account} />
-        <div className="flex-1">
+        <button type="button" onClick={() => fileRef.current?.click()} className="relative shrink-0" aria-label="Profielfoto kiezen">
+          <Avatar account={account} size="lg" />
+          <span className="absolute -bottom-1 -right-1 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground shadow">
+            <Camera className="size-3.5" />
+          </span>
+        </button>
+        <input
+          ref={fileRef}
+          type="file"
+          accept="image/*"
+          className="hidden"
+          onChange={async (e) => {
+            const f = e.target.files?.[0];
+            e.target.value = "";
+            if (!f) return;
+            await setPhoto(await fileToDataUrl(f, 256));
+          }}
+        />
+        <div className="min-w-0 flex-1">
           <p className="font-semibold">{account.name}</p>
           <p className="text-xs text-muted-foreground">{account.isAdmin ? "Beheerder · aangemeld op dit toestel" : "Aangemeld op dit toestel"}</p>
+          <div className="mt-1 flex gap-3 text-xs">
+            <button type="button" onClick={() => fileRef.current?.click()} className="font-semibold text-primary">{account.photo ? "Foto wijzigen" : "Foto toevoegen"}</button>
+            {account.photo && (
+              <button type="button" onClick={() => void setPhoto(undefined)} className="flex items-center gap-0.5 text-muted-foreground">
+                <X className="size-3" /> Verwijder
+              </button>
+            )}
+          </div>
         </div>
         {saved && <span className="flex items-center gap-1 text-xs text-primary"><Check className="size-3.5" /> Opgeslagen</span>}
       </div>

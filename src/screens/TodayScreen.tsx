@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 import { CountUp } from "@/components/ui/count-up";
 import { WeeklyBars } from "@/components/ui/weekly-bars";
+import { LeaderboardCard } from "@/screens/Leaderboard";
 import { useStore } from "@/store/useStore";
 import { useNav } from "@/App";
 import { challengeStatus, currentStreak, dailyGoals, routinesForDay, totalXp, xpOnDay } from "@/lib/stats";
@@ -173,6 +174,10 @@ export function TodayScreen() {
         <Card className="p-3">
           <WeeklyBars data={week} />
         </Card>
+      </Section>
+
+      <Section title="Klassement">
+        <LeaderboardCard />
       </Section>
     </div>
   );

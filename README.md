@@ -66,7 +66,17 @@ In Xcode: kies je team onder *Signing & Capabilities*, sluit je iPhone aan en dr
 Eén vraag per scherm (naam, geslacht, leeftijd, lengte, gewicht, doel, activiteit, trainingsdagen, ervaring). Daaruit worden de dagdoelen berekend (Mifflin-St Jeor × activiteitsfactor, eiwit 2 g/kg, vet 27 %, water 35 ml/kg) en wordt een trainingsprogramma op maat voorgesteld. Het startgewicht wordt niet automatisch als meting geteld: de eerste weging bevestig je zelf op het gewichtsscherm.
 
 ## Trainingsprogramma's
-13 programma's in `src/data/programs.ts`, opgesplitst in **vrouwen** (starter, full body, glutes & legs, upper/lower, shape & strength), **mannen** (starter, full body, 5×5, upper/lower, bodybuilding split, push/pull/legs) en **iedereen** (thuis zonder toestellen, full body basis). Wisselen via Training → Programma's; elk schema blijft daarna aanpasbaar.
+20 programma's in `src/data/programs.ts`, voor 2 tot 6 trainingsdagen per week, opgesplitst in **vrouwen** met nadruk op billen (glute starter 2d, full body 3d, glutes focus 3d, glutes & legs 4d, upper/lower 4d, booty builder 5d, shape & strength 5d, glute PPL 6d), **mannen** (starter 2d, full body 3d, 5×5, PPL 3d, upper/lower 4d, bodybuilding split 5d, upper/lower + PPL 5d, PPL 6d) en **iedereen** (thuis 2d en 3d, full body basis 3d, upper/lower 4d). In Training → Programma's filter je op aantal dagen; het programma dat bij je quiz past krijgt "Aanbevolen". Elk schema blijft daarna aanpasbaar.
+
+## Eigen schema's
+Training → **Nieuw schema**: naam en emoji, trainingsdagen, en oefeningen die je met meerdere tegelijk toevoegt (kiezer blijft open, afgevinkt wat al in het schema zit). Per oefening klap je sets, herhalingen en rust open; volgorde wisselen en verwijderen kan daar ook. Bestaande schema's bewerk je via het potlood.
+
+## Weekklassement en profielfoto
+Op Vandaag staat het **weekklassement** (XP van maandag tot zondag, met trainingen, sets en perfecte dagen als tiebreak), met een paneel per week. Zonder server telt het de accounts op dit toestel. Met Supabase (gratis) zien spelers elkaar ook op andere gsm's: voer `supabase/schema.sql` uit in het Supabase-project en zet `VITE_SUPABASE_URL` en `VITE_SUPABASE_ANON_KEY` als Actions-variabelen in de repo (Settings → Secrets and variables → Actions → Variables); de workflow bouwt ze mee. Elke speler stuurt dan zijn naam, foto en weekscore naar de tabellen `players` en `scores`.
+Een **profielfoto** kies je onder het profiel-icoon (verkleind tot 256 px, lokaal bewaard, meegestuurd naar het klassement).
+
+## Voeding zoeken
+Ruim 330 basisproducten (België/Nederland: eieren en roerei, vlees, vis, zuivel, brood en beleg, maaltijden, snacks, dranken, supplementen) met gangbare porties. Zoeken negeert accenten en matcht alle woorden. Staat iets er niet in, dan zoek je het **online** (Open Food Facts v2, op merk en categorie) of scan je de barcode; gevonden producten komen onder Eigen en werken daarna offline.
 
 ## Barcodes scannen
 In de voedingskiezer: tik op het barcode-icoon, richt de camera op de streepjescode. De app gebruikt de ingebouwde BarcodeDetector of ZXing en zoekt het product op bij Open Food Facts (waarden per 100 g). Gevonden producten worden bewaard als eigen voedingsmiddel, dus de volgende scan werkt ook offline. Niet gevonden? Dan vul je het zelf in, gekoppeld aan de barcode.

@@ -5,11 +5,13 @@ import { useStore } from "@/store/useStore";
 import { levelProgress } from "@/lib/gamification";
 import { totalXp } from "@/lib/stats";
 import { cn } from "@/lib/utils";
+import { Avatar, useAccount } from "@/screens/LockScreen";
 
 export function PageHeader({ title, subtitle, right, className }: { title: string; subtitle?: string; right?: React.ReactNode; className?: string }) {
   const { openProfile } = useNav();
   const xp = useStore((s) => totalXp(s));
   const lp = levelProgress(xp);
+  const { account } = useAccount();
   return (
     <header className={cn("flex items-center justify-between gap-3 px-5 pb-3 pt-4", className)}>
       <div className="min-w-0">
@@ -18,8 +20,8 @@ export function PageHeader({ title, subtitle, right, className }: { title: strin
       </div>
       <div className="flex items-center gap-2">
         {right}
-        <button type="button" onClick={openProfile} aria-label="Profiel en doelen" className="relative grid size-11 place-items-center rounded-full border border-border bg-card text-foreground">
-          <User className="size-5" />
+        <button type="button" onClick={openProfile} aria-label="Profiel en doelen" className="relative grid size-11 place-items-center overflow-visible rounded-full border border-border bg-card text-foreground">
+          {account?.photo ? <Avatar account={account} size="md" className="size-[42px]" /> : <User className="size-5" />}
           <span className="absolute -bottom-1 -right-1 rounded-full bg-primary px-1.5 text-[10px] font-bold text-primary-foreground">{lp.level}</span>
         </button>
       </div>

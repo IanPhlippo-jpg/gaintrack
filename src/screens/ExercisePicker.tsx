@@ -1,5 +1,5 @@
 import * as React from "react";
-import { Camera, Plus, Search } from "lucide-react";
+import { Camera, Check, Plus, Search } from "lucide-react";
 import { Drawer } from "@/components/ui/drawer";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -26,7 +26,18 @@ export function useExerciseSearch(query: string, group: string | null) {
 
 export const dbToExercise = (d: DbExercise): Omit<Exercise, "id" | "custom"> => ({ name: d.n, muscle: d.m, equipment: d.q, dbId: d.id });
 
-export function ExercisePicker({ open, onClose, onPick, title = "Oefening kiezen" }: { open: boolean; onClose: () => void; onPick: (e: Exercise) => void; title?: string }) {
+export function ExercisePicker({ open, onClose, onPick, title = "Oefening kiezen", multi = false, picked, addedCount = 0 }: {
+  open: boolean;
+  onClose: () => void;
+  onPick: (e: Exercise) => void;
+  title?: string;
+  /** Kiezer blijft open; elke tik voegt een oefening toe. */
+  multi?: boolean;
+  /** Al gekozen oefeningen (eigen id's en database-id's) om aan te vinken. */
+  picked?: { ids: string[]; dbIds: string[] };
+  /** Aantal toegevoegd sinds openen (voor de Klaar-knop). */
+  addedCount?: number;
+}) {
   const [q, setQ] = React.useState("");
   const [group, setGroup] = React.useState<string | null>(null);
   const [creating, setCreating] = React.useState(false);
@@ -42,9 +53,20 @@ export function ExercisePicker({ open, onClose, onPick, title = "Oefening kiezen
   }, [open]);
 
   const pickDb = (d: DbExercise) => onPick(addCustomExercise(dbToExercise(d)));
+  const isPicked = (e: { id?: string; dbId?: string }) => !!picked && ((!!e.id && picked.ids.includes(e.id)) || (!!e.dbId && picked.dbIds.includes(e.dbId)));
 
   return (
-    <Drawer open={open} onOpenChange={(o) => !o && onClose()} title={creating ? "Eigen oefening" : title} description={creating ? "Met eigen foto of een foto uit de database" : `${SEED_EXERCISES.length} basisoefeningen · ${EXERCISE_DB.length} met foto in de database`} full>
+    <Drawer open={open} onOpenChange={(o) => !o && onClose()} title={creating ? "Eigen oefening" : multi ? "Oefeningen toevoegen" : title} description={creating ? "Met eigen foto of een foto uit de database" : multi ? "Tik op een oefening om ze toe te voegen; je kunt er meerdere kiezen." : `${SEED_EXERCISES.length} basisoefeningen · ${EXERCISE_DB.length} met foto in de database`} full>
+      {multi && !creating && (
+        <div className="sticky top-0 z-10 -mx-5 -mt-4 mb-3 flex items-center justify-between gap-3 border-b bg-popover/95 px-5 py-2.5 backdrop-blur">
+          <p className="text-sm">
+            <span className="font-bold text-primary">{addedCount}</span> <span className="text-muted-foreground">{addedCount === 1 ? "oefening toegevoegd" : "oefeningen toegevoegd"}</span>
+          </p>
+          <Button size="sm" onClick={onClose}>
+            <Check className="size-4" /> Klaar
+          </Button>
+        </div>
+      )}
       {creating ? (
         <CustomExerciseForm onDone={(e) => onPick(e)} onCancel={() => setCreating(false)} />
       ) : (
@@ -70,8 +92,13 @@ export function ExercisePicker({ open, onClose, onPick, title = "Oefening kiezen
               {own.length > 0 && (
                 <div className="grid grid-cols-2 gap-2">
                   {own.map((e) => (
-                    <button key={e.id} type="button" onClick={() => onPick(e)} className="overflow-hidden rounded-2xl border bg-card text-left active:scale-[0.98]">
+                    <button key={e.id} type="button" onClick={() => onPick(e)} className={cn("relative overflow-hidden rounded-2xl border bg-card text-left active:scale-[0.98]", isPicked(e) && "border-primary ring-2 ring-primary/40")}>
                       <ExerciseMedia exercise={e} size="card" auto={false} className="rounded-none" />
+                      {isPicked(e) && (
+                        <span className="absolute right-2 top-2 grid size-6 place-items-center rounded-full bg-primary text-primary-foreground">
+                          <Check className="size-3.5" />
+                        </span>
+                      )}
                     </button>
                   ))}
                 </div>
@@ -90,7 +117,7 @@ export function ExercisePicker({ open, onClose, onPick, title = "Oefening kiezen
                               {MUSCLES[d.m] ?? d.m} · {EQUIPMENT[d.q] ?? d.q}
                             </p>
                           </div>
-                          <Plus className="size-4 text-muted-foreground" />
+                          {isPicked({ dbId: d.id }) ? <Check className="size-4 text-primary" /> : <Plus className="size-4 text-muted-foreground" />}
                         </button>
                       </li>
                     ))}
@@ -105,7 +132,7 @@ export function ExercisePicker({ open, onClose, onPick, title = "Oefening kiezen
   );
 }
 
-async function fileToDataUrl(file: File, max = 900): Promise<string> {
+export async function fileToDataUrl(file: File, max = 900): Promise<string> {
   const bitmap = await createImageBitmap(file);
   const scale = Math.min(1, max / Math.max(bitmap.width, bitmap.height));
   const canvas = document.createElement("canvas");

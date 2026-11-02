@@ -15,6 +15,8 @@ export type Account = {
   createdAt: string;
   isAdmin: boolean;
   color: string;
+  /** Profielfoto als data-URL (klein, ca. 256 px). */
+  photo?: string;
 };
 
 export type Registry = {
@@ -156,4 +158,22 @@ export async function setActive(r: Registry, id: string | null): Promise<Registr
   await saveRegistry(registry);
   setActiveAccountId(id);
   return registry;
+}
+
+export async function updateAccount(r: Registry, accountId: string, patch: Partial<Pick<Account, "name" | "photo" | "color">>): Promise<Registry> {
+  const registry = { ...r, accounts: r.accounts.map((a) => (a.id === accountId ? { ...a, ...patch } : a)) };
+  await saveRegistry(registry);
+  return registry;
+}
+
+/** Gegevens (store-state) van een account op dit toestel lezen, bv. voor het klassement. */
+export async function readAccountState<T = unknown>(accountId: string): Promise<T | null> {
+  try {
+    const raw = await appStorage.getItem(`${LEGACY_DATA_KEY}:${accountId}`);
+    if (!raw) return null;
+    const parsed = JSON.parse(raw) as { state?: T };
+    return parsed.state ?? null;
+  } catch {
+    return null;
+  }
 }

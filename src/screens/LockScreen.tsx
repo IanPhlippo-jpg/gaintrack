@@ -11,7 +11,7 @@ import { useStore } from "@/store/useStore";
 import { setActiveAccountId } from "@/store/storage";
 import {
   type Account, type CodeCheck, type Registry,
-  changePin, checkAccessCode, createAccount, loadRegistry, lockDelayMs, saveRegistry, setActive, verifyPin,
+  changePin, checkAccessCode, createAccount, loadRegistry, lockDelayMs, saveRegistry, setActive, updateAccount, verifyPin,
 } from "@/lib/accounts";
 import { cn } from "@/lib/utils";
 
@@ -21,10 +21,11 @@ type AccountCtx = {
   update: (r: Registry) => void;
   logout: () => Promise<void>;
   changePin: (pin: string) => Promise<void>;
+  setPhoto: (photo: string | undefined) => Promise<void>;
 };
 const EMPTY_REGISTRY: Registry = { accounts: [], activeId: null, adminSecret: null, handedOut: [], usedInvites: [], failedPin: 0, lockedUntil: 0 };
 export const AccountContext = React.createContext<AccountCtx>({
-  registry: EMPTY_REGISTRY, account: null, update: () => {}, logout: async () => {}, changePin: async () => {},
+  registry: EMPTY_REGISTRY, account: null, update: () => {}, logout: async () => {}, changePin: async () => {}, setPhoto: async () => {},
 });
 export const useAccount = () => React.useContext(AccountContext);
 
@@ -64,12 +65,14 @@ export function PinPad({ onDigit, onBackspace, disabled }: { onDigit: (d: string
   );
 }
 
-export function Avatar({ account, size = "md" }: { account: Account; size?: "md" | "lg" }) {
+const AVATAR_SIZE = { sm: "size-9 text-sm", md: "size-12 text-lg", lg: "size-16 text-2xl", xl: "size-24 text-4xl" } as const;
+
+export function Avatar({ account, size = "md", className }: { account: Pick<Account, "name" | "color" | "photo">; size?: keyof typeof AVATAR_SIZE; className?: string }) {
+  if (account.photo) {
+    return <img src={account.photo} alt={account.name} className={cn("shrink-0 rounded-full object-cover", AVATAR_SIZE[size], className)} />;
+  }
   return (
-    <span
-      className={cn("grid shrink-0 place-items-center rounded-full font-bold text-white", size === "lg" ? "size-16 text-2xl" : "size-12 text-lg")}
-      style={{ background: account.color }}
-    >
+    <span className={cn("grid shrink-0 place-items-center rounded-full font-bold text-white", AVATAR_SIZE[size], className)} style={{ background: account.color }}>
       {account.name.trim().charAt(0).toUpperCase() || "?"}
     </span>
   );
@@ -360,6 +363,12 @@ export function AccountGate({ children }: { children: React.ReactNode }) {
       changePin: async (pin) => {
         if (!registry || !account) return;
         setRegistry(await changePin(registry, account.id, pin));
+      },
+      setPhoto: async (photo) => {
+        if (!registry || !account) return;
+        const r = await updateAccount(registry, account.id, { photo });
+        setRegistry(r);
+        setAccount(r.accounts.find((a) => a.id === account.id) ?? account);
       },
     }),
     [registry, account],
