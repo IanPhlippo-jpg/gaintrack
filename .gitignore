@@ -5,3 +5,4 @@ ios/App/Pods
 ios/App/build
 .DS_Store
 *.local
+release/

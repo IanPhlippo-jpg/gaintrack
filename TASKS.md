@@ -23,6 +23,6 @@
 ## iOS-app bouwen zonder Mac (2026-11-02)
 - [x] iOS-iconen en splash genereren uit een 1024px-logo (@capacitor/assets)
 - [x] GitHub Actions-workflow: macOS-runner bouwt web + Capacitor en levert een unsigned .ipa als artifact (+ TestFlight-workflow)
-- [~] Repo aanmaken en pushen, eerste cloudbuild starten (publiceren via GitHub Desktop: gh-CLI ontbreekt op deze pc)
+- [x] Repo aanmaken (github.com/IanPhlippo-jpg/gaintrack, publiek) en pushen; eerste cloudbuild geslaagd in 3m43s
 - [x] README: .ipa installeren vanaf Windows (Sideloadly, gratis Apple ID) en de TestFlight-route met Apple Developer-account
-- [ ] Buildresultaat controleren en .ipa-link doorgeven
+- [x] Buildresultaat gecontroleerd; .ipa in release/GainTrack-unsigned.ipa en als artifact bij run 41424458377
