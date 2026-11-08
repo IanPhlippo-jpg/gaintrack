@@ -52,7 +52,7 @@ export function useRestTimer() {
     setRunning(false);
     setLeft(0);
   };
-  return { total, left, running, start, pause, resume, adjust, stop, active: left > 0 || running };
+  return { total, left, running, endAt: () => endRef.current, start, pause, resume, adjust, stop, active: left > 0 || running };
 }
 
 export function RestTimer({ timer, className }: { timer: ReturnType<typeof useRestTimer>; className?: string }) {

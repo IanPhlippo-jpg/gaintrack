@@ -29,6 +29,8 @@ export default defineConfig({
       // Registratie gebeurt in main.tsx (virtual:pwa-register) met een updatecheck bij elke keer openen.
       injectRegister: null,
       includeAssets: ["icon-192.png", "icon-512.png"],
+      // Meldingen na de rusttijd (web push): extra code in de service worker, zie public/push-sw.js
+      workbox: { importScripts: ["push-sw.js"] },
       manifest: {
         name: "GainTrack",
         short_name: "GainTrack",

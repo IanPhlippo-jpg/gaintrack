@@ -15,6 +15,20 @@ import { exerciseById, lastPerformance, personalRecords } from "@/lib/stats";
 import { durationMin, e1rm, workoutSets, workoutVolume } from "@/lib/calc";
 import { XP } from "@/lib/gamification";
 import { cn } from "@/lib/utils";
+import { NumberStepper } from "@/components/ui/number-stepper";
+import { cancelRestPush, onPendingLog, scheduleRestPush, takePendingLog } from "@/lib/push";
+
+// Voorstel voor een set: wat je al invulde, anders de vorige set van deze oefening, anders vorige keer.
+// Leest de store rechtstreeks, zodat ook net ingevulde waarden meetellen.
+function suggestie(exIndex: number, setIndex: number) {
+  const st = useStore.getState();
+  const ex = st.activeWorkout?.exercises[exIndex];
+  const set = ex?.sets[setIndex];
+  if (!ex || !set) return { weight: 0, reps: 0 };
+  const vorigeSet = ex.sets[setIndex - 1];
+  const vorigeKeer = lastPerformance(st, ex.exerciseId)?.sets[setIndex];
+  return { weight: set.weight || vorigeSet?.weight || vorigeKeer?.weight || 0, reps: set.reps || vorigeSet?.reps || vorigeKeer?.reps || 0 };
+}
 
 function useElapsed(start: number) {
   const [, tick] = React.useReducer((x: number) => x + 1, 0);
@@ -41,10 +55,14 @@ export function ActiveWorkout({ onFinished }: { onFinished: (w: Workout) => void
   const volume = workoutVolume(w);
   const sets = workoutSets(w);
 
-  const toggleDone = (exIndex: number, setIndex: number) => {
-    const set = w.exercises[exIndex].sets[setIndex];
+  const [quick, setQuick] = React.useState<{ exIndex: number; setIndex: number; weight: number; reps: number } | null>(null);
+  const lastDone = React.useRef<{ exIndex: number; setIndex: number } | null>(null);
+
+  const toggleDone = (exIndex: number, setIndex: number, vals?: { weight: number; reps: number }) => {
+    const set = { ...w.exercises[exIndex].sets[setIndex], ...vals };
     const done = !set.done;
-    state.updateSet(exIndex, setIndex, { done });
+    state.updateSet(exIndex, setIndex, { done, ...vals });
+    if (done) lastDone.current = { exIndex, setIndex };
     if (done) {
       const { settings } = state;
       if (settings.restEnabled) {
@@ -63,6 +81,57 @@ export function ActiveWorkout({ onFinished }: { onFinished: (w: Workout) => void
       }
     }
   };
+
+  // De volgende set die nog open staat: na de laatst afgevinkte, anders de eerste open set.
+  const volgendeSet = () => {
+    const alle = w.exercises.flatMap((ex, exIndex) => ex.sets.map((s, setIndex) => ({ exIndex, setIndex, done: s.done })));
+    const l = lastDone.current;
+    const vanaf = l ? alle.findIndex((x) => x.exIndex === l.exIndex && x.setIndex === l.setIndex) + 1 : 0;
+    return [...alle.slice(vanaf), ...alle.slice(0, vanaf)].find((x) => !x.done) ?? null;
+  };
+
+  // App naar de achtergrond terwijl de rust loopt: melding laten plannen. Terug in beeld: melding schrappen.
+  const latest = React.useRef({ timer, volgendeSet, w, state });
+  latest.current = { timer, volgendeSet, w, state };
+  React.useEffect(() => {
+    const onVis = () => {
+      const { timer, volgendeSet, w, state } = latest.current;
+      if (document.visibilityState === "visible") return cancelRestPush();
+      if (!state.settings.pushEnabled || !timer.running) return;
+      const delaySec = Math.round((timer.endAt() - Date.now()) / 1000);
+      const v = volgendeSet();
+      let body = "Tijd voor je volgende set.";
+      let url = import.meta.env.BASE_URL;
+      if (v) {
+        const naam = exerciseById(state, w.exercises[v.exIndex].exerciseId)?.name ?? "Volgende oefening";
+        const s = suggestie(v.exIndex, v.setIndex);
+        body = `${naam}, set ${v.setIndex + 1}${s.reps ? `: ${s.weight} kg × ${s.reps}` : ""}. Tik om in te vullen.`;
+        url += `?log=${v.exIndex}.${v.setIndex}`;
+      }
+      scheduleRestPush({ delaySec, title: "Rust voorbij", body, url });
+    };
+    document.addEventListener("visibilitychange", onVis);
+    window.addEventListener("pagehide", onVis);
+    return () => {
+      document.removeEventListener("visibilitychange", onVis);
+      window.removeEventListener("pagehide", onVis);
+    };
+  }, []);
+
+  // Tik op de melding: snel-invulscherm voor die set openen.
+  React.useEffect(() => {
+    const open = () => {
+      const p = takePendingLog();
+      const set = p && useStore.getState().activeWorkout?.exercises[p.exIndex]?.sets[p.setIndex];
+      if (!p || !set || set.done) return;
+      setQuick({ ...p, ...suggestie(p.exIndex, p.setIndex) });
+    };
+    open();
+    return onPendingLog(open);
+  }, []);
+
+  const quickNaam = quick ? (exerciseById(state, w.exercises[quick.exIndex]?.exerciseId)?.name ?? "") : "";
+  const quickVorige = quick ? lastPerformance(state, w.exercises[quick.exIndex]?.exerciseId)?.sets[quick.setIndex] : undefined;
 
   const finish = () => {
     const done = state.finishWorkout();
@@ -210,6 +279,31 @@ export function ActiveWorkout({ onFinished }: { onFinished: (w: Workout) => void
       </div>
 
       <ExercisePicker open={picker} onClose={() => setPicker(false)} onPick={(e) => { state.addExerciseToWorkout(e.id); setPicker(false); }} title="Oefening toevoegen" />
+
+      <Drawer open={!!quick} onOpenChange={(o) => !o && setQuick(null)} title={quickNaam} description={quick ? `Set ${quick.setIndex + 1}${quickVorige ? ` · vorige keer ${quickVorige.weight} kg × ${quickVorige.reps}` : ""}` : undefined}>
+        {quick && (
+          <div className="space-y-4">
+            <div className="space-y-3">
+              <div>
+                <p className="mb-1 text-xs font-semibold text-muted-foreground">Gewicht</p>
+                <NumberStepper value={quick.weight} onChange={(v) => setQuick({ ...quick, weight: v })} step={2.5} min={0} max={500} unit="kg" size="lg" />
+              </div>
+              <div>
+                <p className="mb-1 text-xs font-semibold text-muted-foreground">Herhalingen</p>
+                <NumberStepper value={quick.reps} onChange={(v) => setQuick({ ...quick, reps: v })} step={1} min={0} max={100} unit="reps" size="lg" />
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button size="lg" className="flex-1" disabled={quick.reps === 0} onClick={() => { toggleDone(quick.exIndex, quick.setIndex, { weight: quick.weight, reps: quick.reps }); setQuick(null); }}>
+                <Check className="size-5" strokeWidth={3} /> Set opslaan
+              </Button>
+              <Button variant="secondary" size="lg" onClick={() => setQuick(null)}>
+                Later
+              </Button>
+            </div>
+          </div>
+        )}
+      </Drawer>
 
       <Drawer open={confirmCancel} onOpenChange={setConfirmCancel} title="Training stoppen?" description="Niet-afgevinkte sets gaan verloren.">
         <div className="flex gap-2">

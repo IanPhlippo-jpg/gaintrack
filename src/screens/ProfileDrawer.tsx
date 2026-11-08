@@ -10,6 +10,7 @@ import { totalXp } from "@/lib/stats";
 import type { Activity, Goals, Profile } from "@/store/types";
 import { cn, fmtKg } from "@/lib/utils";
 import { AccountSection, AdminSection } from "@/screens/AccountSection";
+import { disablePush, enablePush, type PushStatus } from "@/lib/push";
 
 const ACTIVITIES: { v: Activity; l: string }[] = [
   { v: "zittend", l: "Zittend" },
@@ -30,6 +31,44 @@ function Toggle({ label, desc, checked, onChange }: { label: string; desc?: stri
         <span className={cn("absolute top-0.5 size-6 rounded-full bg-white shadow transition-transform", checked ? "translate-x-[22px]" : "translate-x-0.5")} />
       </span>
     </button>
+  );
+}
+
+const PUSH_UITLEG: Record<Exclude<PushStatus, "aan" | "uit">, string> = {
+  "beginscherm-nodig": "Werkt alleen in de app op je beginscherm. Open Safari, tik op Delen en kies 'Zet op beginscherm', en open GainTrack daarna via dat icoon.",
+  "niet-ondersteund": "Deze browser ondersteunt geen meldingen. Op de iPhone heb je iOS 16.4 of nieuwer nodig.",
+  geweigerd: "Meldingen staan uit voor GainTrack. Zet ze aan via Instellingen > Meldingen > GainTrack.",
+  "geen-server": "Meldingen zijn in deze versie niet ingesteld.",
+};
+
+function PushToggle() {
+  const on = useStore((s) => !!s.settings.pushEnabled);
+  const setSettings = useStore((s) => s.setSettings);
+  const [busy, setBusy] = React.useState(false);
+  const [msg, setMsg] = React.useState<string | null>(null);
+  const change = async (v: boolean) => {
+    setMsg(null);
+    if (!v) {
+      setSettings({ pushEnabled: false });
+      void disablePush();
+      return;
+    }
+    setBusy(true);
+    try {
+      const r = await enablePush();
+      if (r === "aan") setSettings({ pushEnabled: true });
+      else if (r !== "uit") setMsg(PUSH_UITLEG[r]);
+    } catch {
+      setMsg("Inschrijven voor meldingen lukte niet. Probeer het straks opnieuw.");
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className={cn(busy && "pointer-events-none opacity-60")}>
+      <Toggle label="Melding na je rusttijd" desc="Staat je gsm op slot of zit je in een andere app? Dan krijg je een melding. Tik erop om reps en gewicht van je volgende set in te vullen." checked={on} onChange={change} />
+      {msg && <p className="mt-2 rounded-xl bg-muted p-2.5 text-xs text-muted-foreground">{msg}</p>}
+    </div>
   );
 }
 
@@ -158,6 +197,9 @@ export function ProfileDrawer({ open, onOpenChange }: { open: boolean; onOpenCha
               <NumberStepper value={settings.restSec} onChange={(v) => setSettings({ restSec: v })} step={15} min={15} max={600} unit="seconden" />
             </div>
             <Toggle label="Overal dezelfde rust" desc="Negeer de rust per oefening uit je schema" checked={settings.restForAll} onChange={(v) => setSettings({ restForAll: v })} />
+          </div>
+          <div className="mt-3 border-t pt-3">
+            <PushToggle />
           </div>
           <div className="mt-3 border-t pt-3">
             <Toggle label="Trillen" desc="Bij afgevinkte sets, de timer en feestmomenten" checked={settings.haptics} onChange={(v) => setSettings({ haptics: v })} />

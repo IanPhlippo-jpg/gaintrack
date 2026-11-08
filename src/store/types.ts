@@ -152,6 +152,8 @@ export interface Settings {
   restForAll: boolean;
   /** trillen bij set, timer en feestmomenten */
   haptics: boolean;
+  /** melding na de rusttijd als de app op de achtergrond staat (web push) */
+  pushEnabled?: boolean;
 }
 
 export interface XpEvent {

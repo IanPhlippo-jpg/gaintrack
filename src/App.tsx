@@ -19,6 +19,14 @@ import { useScoreSync } from "@/screens/Leaderboard";
 import { ACCENTS, cosmeticAllowed } from "@/lib/unlocks";
 import { levelFromXp } from "@/lib/gamification";
 import { totalXp } from "@/lib/stats";
+import { hasPendingLog, setPendingLog } from "@/lib/push";
+
+// Geopend via een rustmelding (?log=<oefening>.<set>): één keer bij het opstarten lezen en de link opkuisen.
+const startLog = new URLSearchParams(location.search).get("log");
+if (startLog) {
+  setPendingLog(startLog);
+  history.replaceState(null, "", location.pathname + location.hash);
+}
 
 export type Tab = "vandaag" | "voeding" | "training" | "gewicht" | "stats";
 
@@ -49,7 +57,7 @@ function useShort() {
 function Shell() {
   const onboarded = useStore((s) => s.onboarded);
   const activeWorkout = useStore((s) => s.activeWorkout);
-  const [tab, setTab] = React.useState<Tab>("vandaag");
+  const [tab, setTab] = React.useState<Tab>(() => (hasPendingLog() ? "training" : "vandaag"));
   const [profileOpen, setProfileOpen] = React.useState(false);
   const short = useShort();
   useGoalEngine();
@@ -69,6 +77,21 @@ function Shell() {
       el.style.setProperty("--primary-foreground", a.foreground);
     }
   }, [accent, level]);
+
+  // Tik op een rustmelding terwijl de app al open staat: de service worker stuurt de link door.
+  React.useEffect(() => {
+    const open = (href: string) => {
+      const log = new URL(href, location.href).searchParams.get("log");
+      if (!log) return;
+      setTab("training");
+      setPendingLog(log);
+    };
+    const onMsg = (e: MessageEvent) => {
+      if (e.data?.type === "gt-log" && typeof e.data.url === "string") open(e.data.url);
+    };
+    navigator.serviceWorker?.addEventListener("message", onMsg);
+    return () => navigator.serviceWorker?.removeEventListener("message", onMsg);
+  }, []);
 
   const nav = React.useMemo(() => ({ go: setTab, openProfile: () => setProfileOpen(true) }), []);
 

@@ -97,3 +97,13 @@
 - [x] Alle schermen bekeken op 812×375: smalle kolom met lege zijkanten, nav-balk nam hoogte in, pincodescherm paste niet, panelen te breed
 - [x] Liggend (short-variant): zijbalk-navigatie links, twee kolommen op Vandaag/Voeding/Gewicht/Stats, panelen gecentreerd (max 760 px), pincode naast het toetsenbord, safe-areas links/rechts
 - [x] Gecontroleerd liggend en staand; levels trager (800×(L−1)^2,1), water-XP enkel tot dagdoel, max 6 maaltijd-XP per dag, kcal binnen 7 %; live gezet
+
+## Meldingen tijdens je training: tik en vul reps en gewicht in (2026-11-08)
+- [x] Training-flow bekijken (sets loggen, rusttimer, service worker)
+- [x] Supabase: tabel push_jobs + edge function rest-push (web push met VAPID, plannen en annuleren)
+- [x] Service worker: push tonen, tik opent de app op de juiste set
+- [x] Profiel: "Meldingen tijdens training" aanzetten (toestemming + inschrijving)
+- [x] Rusttimer: melding plannen als de app op de achtergrond gaat, annuleren bij terugkomen
+- [x] Snel-invulscherm: reps en gewicht voor de volgende set, vooraf ingevuld, opslaan start de volgende rust
+- [x] Testen in de browser (gsm-formaat): link opent invulscherm, opslaan start de rust, plannen en annuleren
+- [ ] Server klaarzetten (push.sql, functie rest-push, VAPID-secrets) en daarna live zetten op GitHub Pages

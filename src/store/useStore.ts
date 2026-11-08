@@ -88,7 +88,7 @@ export interface AppState {
 
 const DEFAULT_PROFILE: Profile = { name: "", gender: "man", age: 30, heightCm: 180, startWeight: 80, goalType: "maintain", activity: "matig", experience: "beginner", daysPerWeek: 3 };
 const DEFAULT_GOALS: Goals = { kcal: 2500, protein: 160, carbs: 280, fat: 80, waterMl: 2500, targetWeight: 80, weeklyWorkouts: 4 };
-const DEFAULT_SETTINGS: Settings = { restEnabled: true, restSec: 90, restForAll: false, haptics: true };
+const DEFAULT_SETTINGS: Settings = { restEnabled: true, restSec: 90, restForAll: false, haptics: true, pushEnabled: false };
 
 const emptySet = (weight = 0, reps = 0): SetLog => ({ id: uid(), weight, reps, done: false });
 
