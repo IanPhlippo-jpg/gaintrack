@@ -14,7 +14,8 @@ import { MacroTrackerCard } from "@/components/ui/macro-tracker-card";
 import AnimatedTabs from "@/components/ui/animated-tabs";
 import { useStore } from "@/store/useStore";
 import { MEAL_TYPES, type Food, type FoodEntry, type MealType } from "@/store/types";
-import { allFoods, dayNutrition } from "@/lib/stats";
+import { allFoods, dayNutrition, foodSearchText, normText } from "@/lib/stats";
+import { loadOffFoods, useOffFoods } from "@/data/foods-off";
 import { dayKey, fmtDay, fromKey, lastNDays, todayKey } from "@/lib/date";
 import { cn, round } from "@/lib/utils";
 
@@ -144,7 +145,8 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
   const [scanning, setScanning] = React.useState(false);
   const [lookup, setLookup] = React.useState<{ code: string; status: "busy" | "notfound" } | null>(null);
   const [online, setOnline] = React.useState<{ q: string; status: "busy" | "done" | "error" | "cooldown"; results: Omit<Food, "id" | "custom">[]; wait?: number } | null>(null);
-  const foods = allFoods(state);
+  const off = useOffFoods();
+  const foods = React.useMemo(() => allFoods(state), [state.customFoods, off]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const searchOnline = React.useCallback(async (query: string) => {
     const wait = searchCooldownLeft();
@@ -176,6 +178,7 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
   const onBarcode = React.useCallback(
     async (code: string) => {
       setScanning(false);
+      await loadOffFoods();
       const known = allFoods(useStore.getState()).find((f) => f.barcode === code);
       if (known) {
         setSelected(known);
@@ -212,9 +215,8 @@ function FoodPicker({ meal, day, onClose }: { meal: MealType | null; day: string
     if (tab === "favoriet") base = foods.filter((f) => state.favoriteFoodIds.includes(f.id));
     if (tab === "recent") base = recentIds.map((id) => foods.find((f) => f.id === id)).filter((f): f is Food => !!f);
     if (tab === "eigen") base = foods.filter((f) => f.custom);
-    const norm = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
-    const words = norm(q).split(/\s+/).filter(Boolean);
-    if (words.length) base = base.filter((f) => { const n = norm(`${f.name} ${(f.aliases ?? []).join(" ")}`); return words.every((w) => n.includes(w)); });
+    const words = normText(q).split(/\s+/).filter(Boolean);
+    if (words.length) base = base.filter((f) => { const n = foodSearchText(f); return words.every((w) => n.includes(w)); });
     return base.slice(0, 80);
   }, [foods, tab, q, recentIds, state.favoriteFoodIds]);
 

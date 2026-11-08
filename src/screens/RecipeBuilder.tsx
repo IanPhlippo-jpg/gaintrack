@@ -11,6 +11,7 @@ import { NumberStepper } from "@/components/ui/number-stepper";
 import { useStore } from "@/store/useStore";
 import type { Food, RecipeIngredient } from "@/store/types";
 import { allFoods } from "@/lib/stats";
+import { useOffFoods } from "@/data/foods-off";
 import { cn, round } from "@/lib/utils";
 
 const norm = (t: string) => t.toLowerCase().normalize("NFD").replace(/[̀-ͯ]/g, "");
@@ -32,7 +33,8 @@ export function recipeTotals(lines: { food: Pick<Food, "kcal" | "protein" | "car
 
 export function RecipeBuilder({ onDone, onCancel, initial }: { onDone: (f: Food) => void; onCancel: () => void; initial?: Food }) {
   const state = useStore();
-  const foods = React.useMemo(() => allFoods(state).filter((f) => !f.recipe || f.id === initial?.id ? !f.recipe : false), [state, initial?.id]);
+  const off = useOffFoods();
+  const foods = React.useMemo(() => allFoods(state).filter((f) => !f.recipe || f.id === initial?.id ? !f.recipe : false), [state, initial?.id, off]);
   const [name, setName] = React.useState(initial?.name ?? "");
   const [portions, setPortions] = React.useState(initial?.recipe?.portions ?? 1);
   const [lines, setLines] = React.useState<Line[]>(() =>

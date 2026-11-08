@@ -3,6 +3,7 @@ import type { AppState } from "@/store/useStore";
 import type { Challenge, Exercise, SetLog, Workout } from "@/store/types";
 import { SEED_EXERCISES } from "@/data/exercises";
 import { SEED_FOODS } from "@/data/foods";
+import { offFoods } from "@/data/foods-off";
 import { lastNDays, shiftKey, todayKey, weekdayOf, daysBetween } from "./date";
 import { bestSet, e1rm, workoutSets, workoutVolume } from "./calc";
 import { challengeForDay } from "./gamification";
@@ -10,7 +11,19 @@ import { coinsEarned } from "./shop";
 
 export const allExercises = (s: Pick<AppState, "customExercises">): Exercise[] => [...s.customExercises, ...SEED_EXERCISES];
 export const exerciseById = (s: Pick<AppState, "customExercises">, id: string) => allExercises(s).find((e) => e.id === id);
-export const allFoods = (s: Pick<AppState, "customFoods">) => [...s.customFoods, ...SEED_FOODS];
+export const allFoods = (s: Pick<AppState, "customFoods">) => [...s.customFoods, ...SEED_FOODS, ...offFoods()];
+
+/** Zoektekst per voedingsmiddel (kleine letters, zonder accenten), één keer berekend. */
+const searchCache = new WeakMap<object, string>();
+export const normText = (t: string) => t.toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "");
+export function foodSearchText(f: { name: string; aliases?: string[] }) {
+  let v = searchCache.get(f);
+  if (v === undefined) {
+    v = normText(`${f.name} ${(f.aliases ?? []).join(" ")}`);
+    searchCache.set(f, v);
+  }
+  return v;
+}
 
 export interface DayNutrition { kcal: number; protein: number; carbs: number; fat: number; entries: AppState["foodLog"] }
 export function dayNutrition(s: Pick<AppState, "foodLog">, day: string): DayNutrition {

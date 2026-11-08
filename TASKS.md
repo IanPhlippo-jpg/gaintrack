@@ -117,7 +117,7 @@
 - [x] Testen op gsm-formaat, commit
 
 ## Voedingsdatabank naar 5.000 tot 10.000 producten (2026-11-08)
-- [~] Huidige bron en script bekijken (Open Food Facts BE/NL)
-- [ ] Meer supermarktproducten ophalen, dubbels en onvolledige producten eruit
-- [ ] Zoeken snel houden met de grotere lijst (laden, bundelgrootte)
-- [ ] Testen en commit
+- [x] Huidige bron en script bekijken (Open Food Facts BE/NL)
+- [x] Meer supermarktproducten ophalen, dubbels en onvolledige producten eruit
+- [x] Zoeken snel houden met de grotere lijst (laden, bundelgrootte)
+- [x] Testen en commit

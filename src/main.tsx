@@ -4,6 +4,7 @@ import "./index.css";
 import App from "./App";
 import { useStore } from "./store/useStore";
 import { registerSW } from "virtual:pwa-register";
+import { loadOffFoods } from "./data/foods-off";
 
 // Service worker: nieuwe versie meteen activeren en de pagina herladen; bovendien op update controleren
 // telkens de app (op het beginscherm) weer in beeld komt en elke 30 minuten.
@@ -27,3 +28,8 @@ createRoot(document.getElementById("root")!).render(
     <App />
   </StrictMode>,
 );
+
+// De supermarktproducten (duizenden) laden zodra de app rustig is, zodat zoeken meteen werkt.
+const preloadFoods = () => void loadOffFoods();
+if ("requestIdleCallback" in window) requestIdleCallback(preloadFoods, { timeout: 4000 });
+else setTimeout(preloadFoods, 2500);
