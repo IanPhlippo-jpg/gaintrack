@@ -3,6 +3,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { Sparkles } from "lucide-react";
 import { useStore } from "@/store/useStore";
 import { useConfetti } from "./confetti";
+import { CONFETTI_COLORS } from "@/lib/shop";
 
 /** Toont het laatste feestmoment (perfecte dag, uitdaging, badge) als zwevende toast met confetti. */
 export function CelebrationToast() {
@@ -15,7 +16,7 @@ export function CelebrationToast() {
     if (!celebration || celebration.id === lastId.current) return;
     lastId.current = celebration.id;
     const style = useStore.getState().cosmetics.confetti;
-    const colors = style === "gold" ? ["#E8C462", "#F5E3A1", "#C9A227", "#FFFFFF"] : style === "rainbow" ? ["#E8C462", "#F28AB2", "#8FD3FF", "#7FD6A4", "#FF7A59", "#C9C2E3"] : undefined;
+    const colors = style ? CONFETTI_COLORS[style] : undefined;
     fire({ y: window.innerHeight * 0.3, colors });
     if (useStore.getState().settings.haptics) {
       try {

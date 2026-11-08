@@ -82,6 +82,19 @@ Vink je een set af en vergrendel je je gsm (of ga je naar een andere app) terwij
 - Een web-app op de achtergrond kan geen timer laten lopen. Daarom plant de Supabase edge function `rest-push` de melding en stuurt ze via web push (VAPID). Code: `src/lib/push.ts` (app), `public/push-sw.js` (service worker), `supabase/functions/rest-push` (server), `supabase/push.sql` (tabel `push_jobs`, enkel leesbaar voor de functie).
 - Opzet (eenmalig): voer `supabase/push.sql` uit, zet de secrets `VAPID_PUBLIC_KEY`, `VAPID_PRIVATE_KEY` en `VAPID_SUBJECT` en deploy de functie met `npx supabase functions deploy rest-push --project-ref zdiycofagksxoetewpjb --no-verify-jwt`. De geheime VAPID-sleutel staat buiten de repo; de publieke staat in `src/lib/push.ts`.
 
+## Coins, winkel en je diertje
+Je verdient **coins** met XP: 1 coin per 10 XP, en bij elk nieuw level een pot van 50 × dat level (level 3 = 150 coins). Coins worden afgeleid uit je XP, net zoals je level, dus bestaande spelers krijgen meteen coins voor wat ze al haalden. Uitgegeven coins staan in de store (`coinsSpent`).
+
+Op Vandaag staat **Je diertje**. Je adopteert het, geeft het een naam en het groeit van baby via kind en tiener tot volwassen (met spierballetjes). Eten, verzorging en plezier zakken met de tijd (na een dag zonder eten heeft het honger); 's nachts slaapt het. Een verwaarloosd diertje groeit maar half zo snel en elke afgewerkte training maakt het blij.
+
+De winkel heeft vijf tabbladen:
+- **Eten** en **Verzorging**: geef je meteen (appel, eiwitshake, kip met rijst, bubbelbad, balletje ...). Ze vullen de balkjes en geven groeipunten.
+- **Accessoires**: petje, zweetband, koptelefoon, kroon, zonnebril, sjaal, gouden ketting, strikje, mini-halter, shakebeker. Je koopt ze één keer en doet ze aan of uit (één per plek: hoofd, ogen, nek, hand).
+- **Stijl**: andere kleuren en achtergronden (gym, strand, bos, ruimte) voor je diertje.
+- **Profiel**: extra avatar-ringen, accentkleuren, titels en confetti, bovenop wat je met levels ontgrendelt. Ringen en titels zien de anderen in het klassement.
+
+Permanente items vragen een tweede tik ter bevestiging. Code: `src/lib/shop.ts` (coins, catalogus, regels), `src/components/pet/PetAvatar.tsx` (tekening), `src/screens/PetDrawer.tsx` (scherm en winkel).
+
 ## Gerechten samenstellen
 In de voedingskiezer: koksmuts-icoon → **Nieuw gerecht**. Geef een naam, zoek ingrediënten uit de bibliotheek en zet per ingrediënt de hoeveelheid in gram; kies het aantal porties. De app telt kcal, eiwit, koolhydraten en vet op (totaal en per portie) en bewaart het gerecht als eigen voedingsmiddel met waarden per 100 g en "1 portie" als standaardhoeveelheid. Gerechten staan onder Eigen met een koksmuts en zijn via het potlood aan te passen.
 

@@ -6,6 +6,7 @@ import { SEED_FOODS } from "@/data/foods";
 import { lastNDays, shiftKey, todayKey, weekdayOf, daysBetween } from "./date";
 import { bestSet, e1rm, workoutSets, workoutVolume } from "./calc";
 import { challengeForDay } from "./gamification";
+import { coinsEarned } from "./shop";
 
 export const allExercises = (s: Pick<AppState, "customExercises">): Exercise[] => [...s.customExercises, ...SEED_EXERCISES];
 export const exerciseById = (s: Pick<AppState, "customExercises">, id: string) => allExercises(s).find((e) => e.id === id);
@@ -21,6 +22,8 @@ export function dayNutrition(s: Pick<AppState, "foodLog">, day: string): DayNutr
 }
 
 export const totalXp = (s: Pick<AppState, "xpEvents">) => s.xpEvents.reduce((a, e) => a + e.amount, 0);
+/** Coins die je nu kunt uitgeven. */
+export const coinBalance = (s: Pick<AppState, "xpEvents" | "coinsSpent">) => Math.max(0, coinsEarned(totalXp(s)) - (s.coinsSpent ?? 0));
 export const xpOnDay = (s: Pick<AppState, "xpEvents">, day: string) => s.xpEvents.filter((e) => e.day === day).reduce((a, e) => a + e.amount, 0);
 
 export const workoutsOnDay = (s: Pick<AppState, "workouts">, day: string) => s.workouts.filter((w) => w.day === day);

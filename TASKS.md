@@ -107,3 +107,17 @@
 - [x] Snel-invulscherm: reps en gewicht voor de volgende set, vooraf ingevuld, opslaan start de volgende rust
 - [x] Testen in de browser (gsm-formaat): link opent invulscherm, opslaan start de rust, plannen en annuleren
 - [ ] Server klaarzetten (push.sql, functie rest-push, VAPID-secrets) en daarna live zetten op GitHub Pages
+
+## Coins, winkel en een eigen diertje (2026-11-08)
+- [x] Coins: bij elk nieuw level een pot coins (50 × level), plus 1 coin per 10 XP zodat je ook tussen levels iets verdient
+- [x] Diertje: naam kiezen, groeit van baby tot volwassen door eten en verzorging; honger, verzorging en humeur zakken met de tijd
+- [x] Winkel: eten, verzorging, accessoires (pet, zonnebril, halter, kroon ...), kleuren en achtergronden voor het diertje
+- [x] Winkel profiel: extra avatar-ringen, accentkleuren, titels en confetti om te kopen
+- [x] Kaart op Vandaag, coins in het level-kader en in de levelviering
+- [x] Testen op gsm-formaat, commit
+
+## Voedingsdatabank naar 5.000 tot 10.000 producten (2026-11-08)
+- [~] Huidige bron en script bekijken (Open Food Facts BE/NL)
+- [ ] Meer supermarktproducten ophalen, dubbels en onvolledige producten eruit
+- [ ] Zoeken snel houden met de grotere lijst (laden, bundelgrootte)
+- [ ] Testen en commit

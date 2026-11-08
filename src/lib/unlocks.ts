@@ -3,6 +3,7 @@
  * titel, confetti) kies je zelf onder Beloningen en zijn zichtbaar in het klassement; voordelen werken vanzelf.
  */
 import { levelFromXp, xpForLevel } from "@/lib/gamification";
+import { SHOP } from "@/lib/shop";
 
 export type UnlockKind = "frame" | "accent" | "title" | "confetti" | "perk";
 
@@ -44,6 +45,10 @@ export const ACCENTS: Record<string, { label: string; primary: string; foregroun
   roze: { label: "Roze", primary: "#F28AB2", foreground: "#2A0E1A" },
   groen: { label: "Groen", primary: "#7FD6A4", foreground: "#06201A" },
   vuur: { label: "Vuur", primary: "#FF7A59", foreground: "#2A0E05" },
+  // te koop in de winkel
+  oceaan: { label: "Oceaan", primary: "#5CC8E8", foreground: "#04202A" },
+  citroen: { label: "Citroen", primary: "#F2E266", foreground: "#211D04" },
+  magenta: { label: "Magenta", primary: "#E86AF0", foreground: "#2A062C" },
 };
 
 export const FRAMES: Record<string, { label: string }> = {
@@ -52,6 +57,10 @@ export const FRAMES: Record<string, { label: string }> = {
   gold: { label: "Goud" },
   diamond: { label: "Diamant" },
   legend: { label: "Legende" },
+  neon: { label: "Neon" },
+  vuur: { label: "Vuur" },
+  smaragd: { label: "Smaragd" },
+  galaxy: { label: "Galaxy" },
 };
 
 export const isUnlocked = (u: Unlock, level: number) => level >= u.level;
@@ -67,6 +76,8 @@ export const xpToNextUnlock = (xp: number) => {
   const u = nextUnlock(levelFromXp(xp));
   return u ? Math.max(0, xpForLevel(u.level) - xp) : 0;
 };
-/** Mag deze cosmetische keuze (nog) gebruikt worden op dit level? */
-export const cosmeticAllowed = (kind: UnlockKind, value: string | undefined, level: number) =>
-  !value || UNLOCKS.some((u) => u.kind === kind && u.value === value && u.level <= level);
+/** Mag deze cosmetische keuze gebruikt worden: ontgrendeld met je level of gekocht in de winkel? */
+export const cosmeticAllowed = (kind: UnlockKind, value: string | undefined, level: number, owned: string[] = []) =>
+  !value ||
+  UNLOCKS.some((u) => u.kind === kind && u.value === value && u.level <= level) ||
+  SHOP.some((i) => i.cosmetic?.kind === kind && i.cosmetic.value === value && owned.includes(i.id));

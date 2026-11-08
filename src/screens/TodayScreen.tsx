@@ -9,11 +9,14 @@ import { CountUp } from "@/components/ui/count-up";
 import { WeeklyBars } from "@/components/ui/weekly-bars";
 import { LeaderboardCard } from "@/screens/Leaderboard";
 import { RewardsDrawer } from "@/screens/RewardsDrawer";
+import { CoinPill, PetDrawer, StatBar, usePet } from "@/screens/PetDrawer";
+import { PetAvatar } from "@/components/pet/PetAvatar";
+import { moodOf, petNeed, stageOf } from "@/lib/shop";
 import { nextUnlock } from "@/lib/unlocks";
 import { xpForLevel } from "@/lib/gamification";
 import { useStore } from "@/store/useStore";
 import { useNav } from "@/App";
-import { challengeStatus, currentStreak, dailyGoals, routinesForDay, totalXp, xpOnDay } from "@/lib/stats";
+import { coinBalance, challengeStatus, currentStreak, dailyGoals, routinesForDay, totalXp, xpOnDay } from "@/lib/stats";
 import { levelProgress, levelTitle, motivation } from "@/lib/gamification";
 import { fmtDay, shiftKey, todayKey, WEEKDAYS_NL, weekdayOf, weekStartKey } from "@/lib/date";
 import { cn } from "@/lib/utils";
@@ -30,6 +33,9 @@ export function TodayScreen() {
   const lp = levelProgress(xp);
   const nextReward = nextUnlock(lp.level);
   const [rewards, setRewards] = React.useState(false);
+  const [petOpen, setPetOpen] = React.useState(false);
+  const pet = usePet();
+  const coins = coinBalance(state);
   const todayXp = xpOnDay(state, today);
   const challenge = challengeStatus(state, today);
   const planned = routinesForDay(state, today);
@@ -81,6 +87,7 @@ export function TodayScreen() {
                 <span className={cn("inline-flex items-center gap-1 whitespace-nowrap rounded-full px-2 py-0.5 text-xs font-bold", streak > 0 ? "bg-chart-2/20 text-chart-2" : "bg-muted text-muted-foreground")}>
                   <Flame className="size-3" /> {streak} {streak === 1 ? "dag" : "dagen"} streak
                 </span>
+                <CoinPill amount={coins} />
               </div>
             </div>
           </div>
@@ -91,6 +98,45 @@ export function TodayScreen() {
         </Card>
       </Section>
       <RewardsDrawer open={rewards} onClose={() => setRewards(false)} />
+
+      {/* Diertje */}
+      <Section title="Je diertje">
+        <Card className="overflow-hidden">
+          <button type="button" onClick={() => setPetOpen(true)} className="flex w-full items-center gap-3 p-3.5 text-left active:bg-accent/50">
+            {pet ? (
+              <>
+                <div className="grid size-20 shrink-0 place-items-center rounded-2xl bg-primary/10">
+                  <PetAvatar pet={pet} mood={moodOf(pet)} className="size-[76px]" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">
+                    {pet.name} <span className="text-xs font-medium text-muted-foreground">· {stageOf(pet.growth).stage.name}</span>
+                  </p>
+                  <p className="truncate text-xs text-muted-foreground">{petNeed(pet)}</p>
+                  <div className="mt-2 grid grid-cols-3 gap-2">
+                    <StatBar stat="food" value={pet.food} compact />
+                    <StatBar stat="clean" value={pet.clean} compact />
+                    <StatBar stat="fun" value={pet.fun} compact />
+                  </div>
+                </div>
+              </>
+            ) : (
+              <>
+                <div className="grid size-16 shrink-0 place-items-center rounded-2xl bg-primary/15 text-3xl" aria-hidden>🥚</div>
+                <div className="min-w-0 flex-1">
+                  <p className="font-semibold">Adopteer een diertje</p>
+                  <p className="text-xs text-muted-foreground">Verdien coins met XP en levels en laat het groot worden.</p>
+                </div>
+              </>
+            )}
+            <div className="flex flex-col items-end gap-2">
+              <CoinPill amount={coins} />
+              <ChevronRight className="size-4 text-muted-foreground" />
+            </div>
+          </button>
+        </Card>
+      </Section>
+      <PetDrawer open={petOpen} onClose={() => setPetOpen(false)} />
 
       {/* Dagdoelen */}
       <Section

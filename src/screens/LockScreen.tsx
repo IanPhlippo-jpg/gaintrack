@@ -74,6 +74,11 @@ const FRAME_CLASS: Record<string, string> = {
   gold: "ring-2 ring-[#E8C462] shadow-[0_0_14px_rgba(232,196,98,0.7)]",
   diamond: "ring-2 ring-[#8FD3FF] shadow-[0_0_16px_rgba(143,211,255,0.8)]",
   legend: "ring-2 ring-transparent shadow-[0_0_18px_rgba(232,196,98,0.8)]",
+  // te koop in de winkel
+  neon: "ring-2 ring-[#FF5CC8] shadow-[0_0_16px_rgba(0,229,255,0.85)]",
+  vuur: "ring-2 ring-[#FF7A2E] shadow-[0_0_16px_rgba(255,98,46,0.85)]",
+  smaragd: "ring-2 ring-[#3DDC97] shadow-[0_0_16px_rgba(61,220,151,0.75)]",
+  galaxy: "ring-2 ring-transparent shadow-[0_0_18px_rgba(120,90,255,0.8)]",
 };
 
 export function Avatar({ account, size = "md", className }: { account: Pick<Account, "name" | "color" | "photo"> & { frame?: string }; size?: keyof typeof AVATAR_SIZE; className?: string }) {
@@ -85,9 +90,10 @@ export function Avatar({ account, size = "md", className }: { account: Pick<Acco
       {account.name.trim().charAt(0).toUpperCase() || "?"}
     </span>
   );
-  if (account.frame === "legend") {
+  if (account.frame === "legend" || account.frame === "galaxy") {
+    const bg = account.frame === "galaxy" ? "conic-gradient(from 0deg, #2B1B6B, #7B5CFF, #5CC8E8, #E86AF0, #2B1B6B)" : "conic-gradient(from 0deg, #E8C462, #F28AB2, #8FD3FF, #7FD6A4, #E8C462)";
     return (
-      <span className="relative inline-grid shrink-0 place-items-center rounded-full p-[3px]" style={{ background: "conic-gradient(from 0deg, #E8C462, #F28AB2, #8FD3FF, #7FD6A4, #E8C462)" }}>
+      <span className="relative inline-grid shrink-0 place-items-center rounded-full p-[3px]" style={{ background: bg }}>
         {inner}
       </span>
     );

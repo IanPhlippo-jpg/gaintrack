@@ -4,6 +4,7 @@ import { challengeStatus, currentStreak, dailyGoals, dayNutrition, longestStreak
 import { ACHIEVEMENTS, levelFromXp } from "@/lib/gamification";
 import { lastNDays, todayKey, weekStartKey, shiftKey } from "@/lib/date";
 import { hasPerk, unlocksForLevel } from "@/lib/unlocks";
+import { levelCoins } from "@/lib/shop";
 import { levelTitle } from "@/lib/gamification";
 import { workoutVolume } from "@/lib/calc";
 
@@ -57,7 +58,7 @@ export function useGoalEngine() {
       const level = levelFromXp(totalXp(s));
       if (prevLevel !== null && level > prevLevel) {
         const got = unlocksForLevel(level);
-        s.celebrate({ title: `Level ${level}: ${levelTitle(level)}!`, subtitle: got.length ? `Ontgrendeld: ${got.map((u) => `${u.icon} ${u.name}`).join(", ")}` : "Blijf gaan, de volgende beloning komt eraan." });
+        s.celebrate({ title: `Level ${level}: ${levelTitle(level)}!`, subtitle: `+${levelCoins(level)} coins${got.length ? ` · Ontgrendeld: ${got.map((u) => `${u.icon} ${u.name}`).join(", ")}` : ""}` });
       }
       prevLevel = level;
 

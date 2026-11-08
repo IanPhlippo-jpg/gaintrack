@@ -12,6 +12,7 @@ import { todayKey, weekdayOf } from "@/lib/date";
 import { uid, round } from "@/lib/utils";
 import { bestSet, e1rm } from "@/lib/calc";
 import { XP } from "@/lib/gamification";
+import { coinsEarned, growthFactor, isConsumable, petNow, shopItem, type Pet, type PetSlot } from "@/lib/shop";
 
 export interface AppState {
   onboarded: boolean;
@@ -36,6 +37,11 @@ export interface AppState {
   cosmetics: Cosmetics;
   /** Weekbonus (perk) al uitgekeerd per weekstart */
   weekBonuses: Record<string, true>;
+  /** coins uitgegeven in de winkel (verdiend = afgeleid uit XP, zie lib/shop.ts) */
+  coinsSpent: number;
+  /** gekochte permanente items (accessoires, stijl, profiel) */
+  purchases: string[];
+  pet: Pet | null;
 
   // profiel en doelen
   completeOnboarding: (profile: Profile, goals: Goals, weightKg: number, routines?: Routine[]) => void;
@@ -82,6 +88,14 @@ export interface AppState {
   celebrate: (c: { title: string; subtitle?: string; xp?: number }) => void;
   setCosmetics: (patch: Partial<Cosmetics>) => void;
   markWeekBonus: (weekStart: string, xp: number) => void;
+
+  // winkel en diertje
+  adoptPet: (name: string) => void;
+  renamePet: (name: string) => void;
+  /** koopt een item; eten en verzorging gaan meteen naar het diertje. Geeft false bij te weinig coins. */
+  buy: (itemId: string) => boolean;
+  equipPet: (slot: PetSlot, itemId: string | undefined) => void;
+  setPetStyle: (patch: { color?: string; background?: string }) => void;
   clearCelebration: () => void;
   resetAll: () => void;
 }
@@ -115,6 +129,40 @@ export const useStore = create<AppState>()(
       lastCelebration: null,
       cosmetics: {},
       weekBonuses: {},
+      coinsSpent: 0,
+      purchases: [],
+      pet: null,
+
+      adoptPet: (name) => {
+        const now = Date.now();
+        set({ pet: { name: name.trim().slice(0, 16) || "Gainy", color: "lila", growth: 0, food: 70, clean: 80, fun: 70, updatedAt: now, createdAt: now, equipped: {} } });
+      },
+      renamePet: (name) => set((s) => (s.pet ? { pet: { ...s.pet, name: name.trim().slice(0, 16) || s.pet.name } } : {})),
+      buy: (itemId) => {
+        const s = get();
+        const item = shopItem(itemId);
+        if (!item) return false;
+        const balance = coinsEarned(totalXp(s)) - s.coinsSpent;
+        if (balance < item.price) return false;
+        if (isConsumable(item)) {
+          if (!s.pet) return false;
+          const p = petNow(s.pet);
+          const e = item.effect ?? {};
+          const c = (v: number) => Math.max(0, Math.min(100, v));
+          const pet: Pet = { ...p, food: c(p.food + (e.food ?? 0)), clean: c(p.clean + (e.clean ?? 0)), fun: c(p.fun + (e.fun ?? 0)), growth: p.growth + Math.round((e.growth ?? 0) * growthFactor(p)) };
+          set({ pet, coinsSpent: s.coinsSpent + item.price });
+          return true;
+        }
+        if (s.purchases.includes(itemId)) return false;
+        set({ purchases: [...s.purchases, itemId], coinsSpent: s.coinsSpent + item.price });
+        return true;
+      },
+      equipPet: (slot, itemId) =>
+        set((s) => {
+          if (!s.pet || (itemId && !s.purchases.includes(itemId))) return {};
+          return { pet: { ...s.pet, equipped: { ...s.pet.equipped, [slot]: itemId } } };
+        }),
+      setPetStyle: (patch) => set((s) => (s.pet ? { pet: { ...s.pet, ...patch } } : {})),
 
       setSettings: (p) => set((s) => ({ settings: { ...s.settings, ...p } })),
       completeOnboarding: (profile, goals, weightKg, routines) => {
@@ -297,7 +345,8 @@ export const useStore = create<AppState>()(
         }
         done.prs = prs;
         const sets = done.exercises.reduce((n, ex) => n + ex.sets.length, 0);
-        set((st) => ({ workouts: [...st.workouts, done], activeWorkout: null }));
+        // Je diertje traint mee: een afgewerkte training maakt het blij.
+        set((st) => ({ workouts: [...st.workouts, done], activeWorkout: null, pet: st.pet ? (() => { const p = petNow(st.pet); return { ...p, fun: Math.min(100, p.fun + 25) }; })() : null }));
         get().awardXp(XP.workout + sets * XP.set, `Training afgewerkt: ${done.name}`, done.day);
         if (prs.length) get().awardXp(prs.length * XP.pr, `${prs.length} nieuw${prs.length > 1 ? "e" : ""} PR${prs.length > 1 ? "'s" : ""}`, done.day);
         return done;
@@ -354,7 +403,7 @@ export const useStore = create<AppState>()(
         set({
           onboarded: false, profile: DEFAULT_PROFILE, goals: DEFAULT_GOALS, settings: DEFAULT_SETTINGS, customFoods: [], favoriteFoodIds: [], foodLog: [], water: {},
           customExercises: [], routines: SEED_ROUTINES, workouts: [], activeWorkout: null, weights: [], xpEvents: [], achievements: {},
-          perfectDays: {}, challengesDone: {}, lastCelebration: null, cosmetics: {}, weekBonuses: {},
+          perfectDays: {}, challengesDone: {}, lastCelebration: null, cosmetics: {}, weekBonuses: {}, coinsSpent: 0, purchases: [], pet: null,
         }),
     }),
     {
@@ -365,7 +414,7 @@ export const useStore = create<AppState>()(
       partialize: (s) => ({ ...s, lastCelebration: null }),
       merge: (persisted, current) => {
         const p = (persisted ?? {}) as Partial<AppState>;
-        return { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) }, profile: { ...DEFAULT_PROFILE, ...(p.profile ?? {}) }, cosmetics: p.cosmetics ?? {}, weekBonuses: p.weekBonuses ?? {} };
+        return { ...current, ...p, settings: { ...DEFAULT_SETTINGS, ...(p.settings ?? {}) }, profile: { ...DEFAULT_PROFILE, ...(p.profile ?? {}) }, cosmetics: p.cosmetics ?? {}, weekBonuses: p.weekBonuses ?? {}, coinsSpent: p.coinsSpent ?? 0, purchases: p.purchases ?? [], pet: p.pet ?? null };
       },
     },
   ),

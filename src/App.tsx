@@ -65,9 +65,10 @@ function Shell() {
   // Ontgrendelde accentkleur toepassen op de hele app.
   const accent = useStore((s) => s.cosmetics.accent);
   const level = useStore((s) => levelFromXp(totalXp(s)));
+  const owned = useStore((s) => s.purchases);
   React.useEffect(() => {
     const el = document.documentElement;
-    const a = accent && cosmeticAllowed("accent", accent, level) ? ACCENTS[accent] : null;
+    const a = accent && cosmeticAllowed("accent", accent, level, owned) ? ACCENTS[accent] : null;
     for (const v of ["--primary", "--ring", "--chart-1", "--brand", "--primary-foreground"]) el.style.removeProperty(v);
     if (a) {
       el.style.setProperty("--primary", a.primary);
@@ -76,7 +77,7 @@ function Shell() {
       el.style.setProperty("--brand", a.primary);
       el.style.setProperty("--primary-foreground", a.foreground);
     }
-  }, [accent, level]);
+  }, [accent, level, owned]);
 
   // Tik op een rustmelding terwijl de app al open staat: de service worker stuurt de link door.
   React.useEffect(() => {
